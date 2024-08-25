@@ -27,7 +27,7 @@ class UmidaPlayer : PlayerPawn
 	override void Tick()
 	{
 		super.Tick();
-		if(player.Buttons & BT_ATTACK && !(player.Original_OldButtons & BT_ATTACK))
+		if(player.cmd.Buttons & BT_USE)
 		{
 			debug.LogDebug(self.GetClassName().." : Spawned test object at ");
 			vector3 dest = Harpoon(EventHandler.Find("Harpoon")).diff;

@@ -1,0 +1,38 @@
+
+
+mixin class SCCommonUIVar
+{
+    double resol_const_w;
+    double resol_const_h;
+    
+
+    enum info
+    {
+        CONST_TEXT_W_DEFAULT = 1920,
+        CONST_TEXT_H_DEFAULT = 1080
+    };
+    //make sure to put this in somewhere looping.
+    void UpdateCommonUiVar()
+    {
+        resol_const_w = Screen.GetWidth() * 1.0 / CONST_TEXT_W_DEFAULT;
+        resol_const_h = Screen.GetHeight() * 1.0 / CONST_TEXT_H_DEFAULT;
+        Debuginfo(EventHandler.Find("Debuginfo")).AddMInfoItem(String.Format("resol_const_w : %f", resol_const_w), "resolution_constant_width");
+        Debuginfo(EventHandler.Find("Debuginfo")).AddMInfoItem(String.Format("resol_const_h : %f", resol_const_h), "resolution_constant_height");
+    }
+
+    ui double ScaleXbyResolution(double x)
+    {
+        return (x * 1.0) * resol_const_w;
+    }
+
+    ui double ScaleYbyResolution(double y)
+    {
+        return (y * 1.0) * resol_const_h;
+    }
+
+    ui Vector2 ScaleXYbyResolution(vector2 scale)
+    {
+        return (ScaleXbyResolution(scale.x), ScaleYbyResolution(scale.y));
+    }
+	    
+}

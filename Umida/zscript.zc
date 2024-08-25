@@ -1,0 +1,15 @@
+version "4.13.0"
+
+#include "zscript/lib/CommonUIVar.zsc"
+#include "zscript/lib/debuginfo.zsc"
+
+#include "zscript/lib/libeye/projector.txt"
+#include "zscript/lib/libeye/projector gl.txt"
+#include "zscript/lib/libeye/projector planar.txt"
+#include "zscript/lib/libeye/viewport.txt"
+
+#include "zscript/MyStandaloneGamePlayer/MyStandaloneGamePlayer.zc"
+#include "zscript/MyStandaloneGameHUD/MyStandaloneGameHUD.zc"
+#include "zscript/Boat.zsc"
+#include "zscript/Handler.zsc"
+#include "zscript/mouse.zsc"

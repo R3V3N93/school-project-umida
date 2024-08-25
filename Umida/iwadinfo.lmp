@@ -1,0 +1,10 @@
+IWAD
+{
+	Name = "Umida"
+	BannerColors = "dea840", "003d59"
+	Autoname = "Umida"
+	Game = "Doom"
+	Config = "Umida"
+	IWADName = "Umida.ipk3"
+	Mapinfo = "mapinfo/mindefaults.txt"
+}

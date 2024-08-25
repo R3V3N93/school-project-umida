@@ -1,0 +1,58 @@
+GameInfo
+{
+
+	TitlePage = "graphics/titlepic.png"
+	CursorPic = "graphics/m_cursor.png"
+	PauseSign = "graphics/m_pause.png"
+	BorderFlat = "graphics/border_flat.png"
+	MenuBackButton = "graphics/m_back.png"
+	MenuFontColor_Title = "White"
+	MenuFontColor_Label = "Default"
+	MenuFontColor_Value = "Gray"
+	MenuFontColor_Action = "Gray"
+	MenuFontColor_Header = "White"
+	MenuFontColor_Highlight = "White"
+	MenuFontColor_Selection = "Gray"
+	FullscreenAutoAspect = 3
+	DimColor = "0b 0b 0b"
+	DimAmount = 0.8
+	PlayerClasses = "UmidaPlayer"
+	StatusbarClass = "MyStandaloneGameHUD"
+	EventHandlers = "Handler", "Harpoon", "Debuginfo"
+}
+
+DoomedNums
+{
+	10000 = AllWeHadToDoWasToFollowTheDamnBoatCJ
+}
+
+//-------------------------------------------------------------------------------------------
+//
+//
+//
+//-------------------------------------------------------------------------------------------
+
+ClearEpisodes
+Episode map01
+{
+	Name = "$TXT_MAP01_NAME"
+}
+
+Skill normal
+{
+	SpawnFilter = Normal
+	Name = "$SKILL_NORMAL"
+	DefaultSkill
+}
+
+//-------------------------------------------------------------------------------------------
+//
+//
+//
+//-------------------------------------------------------------------------------------------
+
+Map "MAP01" "$TXT_MAP01"
+{
+	LightMode = 3
+	Sky1 = "textures/sky1.png"
+}

@@ -1,0 +1,12 @@
+[enu default]
+
+TXT_GAME_NAME = "My Standalone Game";
+
+TXT_MAP01 = "My Test Level";
+
+TXT_HUD_HEALTH = "Health: ";
+
+MENU_START = "Start Game";
+MENU_OPTION = "Settings";
+MENU_SCORE = "Score";
+MENU_QUIT = "Quit";

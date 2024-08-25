@@ -1,0 +1,16 @@
+class AllWeHadToDoWasToFollowTheDamnBoatCJ : Actor
+{
+    default
+    {
+        Radius 10;
+        Height 10;
+        +NOBLOCKMAP;
+    }
+
+    States
+    {
+        Spawn:
+            PLAY A 1;
+            Loop;
+    }
+}

@@ -1,0 +1,10 @@
+class Handler : EventHandler
+{
+    override void PlayerSpawned(PlayerEvent e)
+    {
+        Playerinfo p = players[e.PlayerNumber];
+        p.mo.SetOrigin(p.mo.pos + (0, 0, 500), false);
+		p.cheats |= CF_TOTALLYFROZEN;
+		p.mo.Pitch = 90;
+    }
+}

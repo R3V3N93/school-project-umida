@@ -1,0 +1,14 @@
+class HarpoonObj : Actor
+{
+    default
+    {
+        +NOBLOCKMAP;
+    }
+
+    States
+    {
+        Spawn:
+            TNT1 A 1;
+            Loop;
+    }
+}

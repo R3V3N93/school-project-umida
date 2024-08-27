@@ -13,8 +13,10 @@
 
 class Harpoon : EventHandler {
 	const turn_bound = 0.400;
+
+	actor harpoon; // stores physical 3d harpoon
 	
-	protected vector2				cursor_pos;
+	vector2				cursor_pos;
 	protected vector2				resolution;
 	protected vector2				window_resolution;
 	protected vector2				cursor_tl;
@@ -37,6 +39,12 @@ class Harpoon : EventHandler {
 	vector3 CursorDirection () const 
 	{
 		return diff;
+	}
+
+	override void WorldThingSpawned(WorldEvent e)
+	{
+		if(e.Thing is 'HarpoonObj')
+			self.harpoon = e.Thing;
 	}
 	
 	override void WorldTick () 
@@ -70,6 +78,31 @@ class Harpoon : EventHandler {
 		proj.OrientForPlayer(player);
 		proj.BeginDeprojection();
 		diff = proj.DeprojectScreenToDiff(cursor_pos);
+
+		proj.BeginProjection();
+
+		if(harpoon)
+		{
+			//proj.ProjectActorPos(harpoon.pos);
+			vector2 harpoonLoc = (Screen.GetWidth() / 2.0, Screen.GetHeight() / 6.0)//proj.ProjectToScreen();
+
+			// distance between mouse and harpoon
+			// if the distance is larger than a half diameter of a circle, shorten it.
+			double dist = sqrt(abs(cursor_pos.x - harpoonLoc.x) ** 2 + abs(cursor_pos.y - harpoonLoc.y) ** 2);
+			if(dist > Screen.GetHeight() / 10.8)
+			{
+				// 10.8 == 1080 / 100
+				dist = Screen.GetHeight() / 10.8;
+			}
+
+			harpoon.angle = atan2(mouse.x - Screen.GetWidth() / 2.0, mouse.y - (Screen.GetHeight() / 2.0 - harpoonLoc.y));
+
+			int c = cos(harpoon.angle);
+			int s = sin(harpoon.angle);
+
+			Vector3 harpoonFinalLoc = harpoonLoc + (dist * s, dist * c, 0);
+			harpoon.SetOrigin(harpoonFinalLoc, true);
+		}	
 	}
 	
 	// kd: Same deal with the hitbox viewer to handle either render mode.

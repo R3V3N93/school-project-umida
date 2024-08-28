@@ -2,7 +2,9 @@ class HarpoonObj : Actor
 {
     default
     {
-        +NOBLOCKMAP;
+        Height 10;
+        Radius 10;
+        //+NOBLOCKMAP;
     }
 
     States

@@ -16,6 +16,7 @@ class UmidaPlayer : PlayerPawn
 		Player.Colorset 1, "$TXT_COLOR_RED", 96, 143, 96;
 		Player.Colorset 2, "$TXT_COLOR_BLUE", 192, 239, 192;
 		+NOGRAVITY;
+		-FLOATBOB;
 	}
 
 	override void PostBeginPlay()
@@ -30,7 +31,7 @@ class UmidaPlayer : PlayerPawn
 		if(player.cmd.Buttons & BT_USE)
 		{
 			debug.LogDebug(self.GetClassName().." : Spawned test object at ");
-			vector3 dest = Harpoon(EventHandler.Find("Harpoon")).diff;
+			vector3 dest = Harpoon(EventHandler.Find("Harpoon")).cursor_pos_3d;
 			if(Spawn("AllWeHadToDoWasToFollowTheDamnBoatCJ", dest))
 			{
 				debug.LogDebug(self.GetClassName().." : Spawned test object at "..dest);

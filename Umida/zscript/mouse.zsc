@@ -11,12 +11,19 @@
 	
 	*/
 
-class Harpoon : EventHandler {
+class Harpoon : EventHandler 
+{
 	const turn_bound = 0.400;
 
+	DebugInfo debug;
+
 	actor harpoon; // stores physical 3d harpoon
+	vector3 harpoon_pos;
 	
+	Playerinfo p;
+
 	vector2				cursor_pos;
+	vector3 cursor_pos_3d;
 	protected vector2				resolution;
 	protected vector2				window_resolution;
 	protected vector2				cursor_tl;
@@ -44,9 +51,34 @@ class Harpoon : EventHandler {
 	override void WorldThingSpawned(WorldEvent e)
 	{
 		if(e.Thing is 'HarpoonObj')
+		{
 			self.harpoon = e.Thing;
+			self.harpoon_pos = harpoon.pos;
+		}
 	}
 	
+	vector3 DiffToWorld(vector3 diff)
+	{
+		// kd: Find something under the cursor, maybe. Tell everybody who is
+		// interested.
+		FlineTraceData data;
+		
+		// kd: Note diff isn't necessarily a unit vector. If you look straight
+		// up, it is squished by pixel stretch...
+		let cursor_ang	=  VectorAngle(diff.x, diff.y);
+		let cursor_vang	= -VectorAngle(diff.xy.length(), diff.z);
+
+		p.mo.LineTrace(
+			cursor_ang,
+			25000.13376669,
+			cursor_vang,
+			TRF_THRUBLOCK | TRF_THRUHITSCAN,
+			offsetz: p.viewheight,
+			data: data);
+
+		return data.hitlocation;
+	}
+
 	override void WorldTick () 
 	{
 		PlayerInfo player	= players [consoleplayer];
@@ -81,6 +113,8 @@ class Harpoon : EventHandler {
 
 		proj.BeginProjection();
 
+		cursor_pos_3d = DiffToWorld(diff);
+
 		if(harpoon)
 		{
 			proj.ProjectWorldPos(harpoon.pos);
@@ -88,20 +122,30 @@ class Harpoon : EventHandler {
 
 			// distance between mouse and harpoon
 			// if the distance is larger than a half diameter of a circle, shorten it.
-			double dist = sqrt(abs(cursor_pos.x - harpoonLoc.x) ** 2 + abs(cursor_pos.y - harpoonLoc.y) ** 2);
+			double dist = sqrt(abs(cursor_pos.x - harpoon.pos.x) ** 2 + abs(cursor_pos.y - harpoonLoc.y) ** 2);
+			double dist3D = sqrt(abs(cursor_pos_3d.x - harpoon_pos.x) ** 2 + abs(cursor_pos_3d.y - harpoon_pos.y) ** 2);
+
+			debug.AddMInfoItem(self.GetClassName().." : dist3d = "..dist3D);
+
 			if(dist > Screen.GetHeight() / 10.8)
 			{
 				// 10.8 == 1080 / 100
 				dist = Screen.GetHeight() / 10.8;
 			}
-
+			
 			harpoon.angle = atan2(-(cursor_pos.x - Screen.GetWidth() / 2.0), -(cursor_pos.y -  harpoonLoc.y)) + 90;
 
-			//int c = cos(harpoon.angle);
-			//int s = sin(harpoon.angle);
+			debug.AddMInfoItem(self.GetClassName().." : angle = "..harpoon.angle);
 
-			//Vector3 harpoonFinalLoc = (harpoonLoc.x, harpoonLoc.y, 0) + (dist * s, dist * c, 0);
-			//harpoon.SetOrigin(harpoonFinalLoc, true);
+			int c = cos(harpoon.angle);
+			int s = sin(harpoon.angle);
+
+			Vector3 harpoonFinalLoc = harpoon_pos + (dist3D * s, -dist3D * c, 0);
+
+			debug.AddMInfoItem(self.GetClassName().." : harpoon_pos = "..harpoon_pos);
+			debug.AddMInfoItem(self.GetClassName().." : harpoonFinalLoc = "..harpoonFinalLoc);
+
+			harpoon.SetOrigin(harpoonFinalLoc, true);
 		}	
 	}
 	
@@ -112,7 +156,9 @@ class Harpoon : EventHandler {
 		gl_proj			= new("Le_GlScreen");
 		sw_proj			= new("Le_SwScreen");
 		cvar_renderer	= Cvar.GetCvar("vid_rendermode", players [consoleplayer]);
+		p = players[consoleplayer];
 		PrepareProjection();
+		debug = DebugInfo(Eventhandler.Find("Debuginfo"));
 	}
 	
 	protected void PrepareProjection () 
@@ -173,8 +219,8 @@ class Harpoon : EventHandler {
 		Screen.DrawTexture(
 			sprite_cursor,
 			true,
-			cursor_pos.x,
-			cursor_pos.y,
+			cursor_pos.x - Texman.Getsize(sprite_cursor) / 2,
+			cursor_pos.y - Texman.Getsize(sprite_cursor) / 2,
 			DTA_KEEPRATIO,		true,
 			DTA_VIRTUALWIDTHF,	resolution.x,
 			DTA_VIRTUALHEIGHTF,	resolution.y);

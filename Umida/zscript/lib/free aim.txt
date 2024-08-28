@@ -1,5 +1,3 @@
-// Modified version of libeye's example : 'free aim.txt'
-
 /*	kd:
 	
 	This allows shooting where your cursor is aimed. Keep in mind this
@@ -11,12 +9,10 @@
 	
 	*/
 
-class Harpoon : EventHandler {
+class FreeAim : EventHandler {
 	const turn_bound = 0.400;
-
-	actor harpoon; // stores physical 3d harpoon
 	
-	vector2				cursor_pos;
+	protected vector2				cursor_pos;
 	protected vector2				resolution;
 	protected vector2				window_resolution;
 	protected vector2				cursor_tl;
@@ -34,21 +30,15 @@ class Harpoon : EventHandler {
 	protected transient Cvar		cvar_renderer;
 	protected bool					can_project;
 	
-	vector3 diff;
+	protected ShowBox				hitbox_view;
+	protected Actor					cursor_mo;
+	protected vector3				diff;
 	
-	vector3 CursorDirection () const 
-	{
+	vector3 CursorDirection () const {
 		return diff;
 	}
-
-	override void WorldThingSpawned(WorldEvent e)
-	{
-		if(e.Thing is 'HarpoonObj')
-			self.harpoon = e.Thing;
-	}
 	
-	override void WorldTick () 
-	{
+	override void WorldTick () {
 		PlayerInfo player	= players [consoleplayer];
 		let po				= PlayerPawn(player.mo);
 		
@@ -65,6 +55,8 @@ class Harpoon : EventHandler {
 		cursor_tl = (0, 0);
 		cursor_br = window_resolution;
 		
+		HandleTurning(player, po);
+		
 		// kd: Prepare for some deprojections. We'll at least find out if there
 		// is something under the cursor.
 		PrepareProjection();
@@ -78,45 +70,41 @@ class Harpoon : EventHandler {
 		proj.OrientForPlayer(player);
 		proj.BeginDeprojection();
 		diff = proj.DeprojectScreenToDiff(cursor_pos);
-
-		proj.BeginProjection();
-
-		if(harpoon)
-		{
-			proj.ProjectWorldPos(harpoon.pos);
-			vector2 harpoonLoc = proj.ProjectToScreen();
-
-			// distance between mouse and harpoon
-			// if the distance is larger than a half diameter of a circle, shorten it.
-			double dist = sqrt(abs(cursor_pos.x - harpoonLoc.x) ** 2 + abs(cursor_pos.y - harpoonLoc.y) ** 2);
-			if(dist > Screen.GetHeight() / 10.8)
-			{
-				// 10.8 == 1080 / 100
-				dist = Screen.GetHeight() / 10.8;
-			}
-
-			harpoon.angle = atan2(-(cursor_pos.x - Screen.GetWidth() / 2.0), -(cursor_pos.y -  harpoonLoc.y)) + 90;
-
-			//int c = cos(harpoon.angle);
-			//int s = sin(harpoon.angle);
-
-			//Vector3 harpoonFinalLoc = (harpoonLoc.x, harpoonLoc.y, 0) + (dist * s, dist * c, 0);
-			//harpoon.SetOrigin(harpoonFinalLoc, true);
-		}	
+		
+		// kd: Find something under the cursor, maybe. Tell everybody who is
+		// interested.
+		FlineTraceData data;
+		
+		// kd: Note diff isn't necessarily a unit vector. If you look straight
+		// up, it is squished by pixel stretch...
+		let cursor_ang	=  VectorAngle(diff.x, diff.y);
+		let cursor_vang	= -VectorAngle(diff.xy.length(), diff.z);
+		
+		po.LineTrace(
+			cursor_ang,
+			25000.13376669,
+			cursor_vang,
+			TRF_THRUBLOCK | TRF_THRUHITSCAN,
+			offsetz: player.viewheight,
+			data: data);
+		
+		cursor_mo = data.hitactor;
+		
+		if(hitbox_view) {
+			hitbox_view.SetTarget(cursor_mo);
+		}
 	}
 	
 	// kd: Same deal with the hitbox viewer to handle either render mode.
-	override void OnRegister () 
-	{
-		sprite_cursor	= TexMan.CheckForTexture("graphics/harpooncursor.png", TexMan.type_any);
+	override void OnRegister () {
+		sprite_cursor	= TexMan.CheckForTexture("misla5", TexMan.type_any);
 		gl_proj			= new("Le_GlScreen");
 		sw_proj			= new("Le_SwScreen");
 		cvar_renderer	= Cvar.GetCvar("vid_rendermode", players [consoleplayer]);
 		PrepareProjection();
 	}
 	
-	protected void PrepareProjection () 
-	{
+	protected void PrepareProjection () {
 		if(cvar_renderer)
 		switch(cvar_renderer.GetInt()) {
 		default:
@@ -139,11 +127,59 @@ class Harpoon : EventHandler {
 		can_project	= proj != NULL;
 	}
 	
-	override void PlayerEntered (PlayerEvent event) 
-	{
+	override void PlayerEntered (PlayerEvent event) {
+		cursor_mo	= NULL;
+		hitbox_view	= ShowBox(hitbox_view.Find("ShowBox"));
+		
+		// kd: Before anything else we wanna freeze the player's angles.
+		PlayerInfo player	= players [consoleplayer];
+		let po				= PlayerPawn(player.mo);
+		
+		if(po) {
+			angle = (po.angle, po.pitch);
+		}
+		
 		// kd: Just make sure we got that important info...
 		WorldTick();
 		cursor_pos = 0.5 * (cursor_tl + cursor_br);
+	}
+	
+	protected void HandleTurning (PlayerInfo player, PlayerPawn po) {
+		// kd: Bounds in which we don't turn.
+		let top_left		= turn_bound * (720, 720);
+		let bottom_right	= window_resolution - top_left;
+		
+		// kd: Look around. Turning is faster towards the window edges.
+		let aim_speed	= (4.666, 2.666);
+		let aim_offset	= (0, 0);
+		
+		if(cursor_pos.x		< top_left.x) {
+			aim_offset.x = aim_speed.x * (1 - cursor_pos.x / top_left.x);
+		}
+		
+		if(bottom_right.x	< cursor_pos.x)	{
+			aim_offset.x = -aim_speed.x * (cursor_pos.x - bottom_right.x) / top_left.x;
+		}
+		
+		if(cursor_pos.y		< top_left.y) {
+			aim_offset.y = -aim_speed.y * (1 - cursor_pos.y / top_left.y);
+		}
+		
+		if(bottom_right.y	< cursor_pos.y)	{
+			aim_offset.y = aim_speed.y * (cursor_pos.y - bottom_right.y) / top_left.y;
+		}
+		
+		// kd: Don't turn if you hold use.
+		if(player.original_cmd.buttons & BT_USE) {
+			aim_offset = (0, 0);
+		}
+		
+		angle = (
+			angle.x + aim_offset.x,
+			clamp(angle.y + aim_offset.y, min_vang, max_vang));
+		
+		po.A_SetAngle(angle.x, SPF_INTERPOLATE);
+		po.A_SetPitch(angle.y, SPF_INTERPOLATE);
 	}
 	
 	// kd: Moves the mouse cursor.

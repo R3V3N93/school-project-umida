@@ -1,10 +1,59 @@
 class Handler : EventHandler
 {
+    DebugInfo debug;
+    //01
+    //23
+    Vector3 screenBorder[4];
+
+    double screenXLeft;
+    double screenXRight;
+    double screenYUp;
+    double screenYDown;
+
+    int gamestate;
+    int timer; // tic
+    int spawngap; // tic
+
     override void PlayerSpawned(PlayerEvent e)
     {
         Playerinfo p = players[e.PlayerNumber];
         p.mo.SetOrigin(p.mo.pos + (0, 0, 500), false);
 		p.cheats |= CF_TOTALLYFROZEN;
 		p.mo.Pitch = 90;
+    }
+
+    void setSpawngap()
+    {
+        spawngap = random(5, 70);
+        return;
+    }
+
+    override void OnRegister () 
+	{
+		debug = DebugInfo(Eventhandler.Find("Debuginfo"));
+        setSpawngap();
+	}
+
+    override void WorldTick()
+    {
+        debug.AddMInfoItem(self.GetClassName().." : Screen left top = "..screenBorder[0]);
+        debug.AddMInfoItem(self.GetClassName().." : Screen Right top = "..screenBorder[1]);
+        debug.AddMInfoItem(self.GetClassName().." : Screen left bottom = "..screenBorder[2]);
+        debug.AddMInfoItem(self.GetClassName().." : Screen right bottom = "..screenBorder[3]);
+        screenXLeft = screenBorder[0].x;
+        screenXRight = screenBorder[3].x;
+        screenYUp = screenBorder[0].y;
+        screenYDown = screenBorder[3].y;
+
+        debug.AddMInfoItem(self.GetClassName().." : spawngap = "..spawngap);
+        spawngap--;
+        if(spawngap <= 0)
+        {   
+            Actor r3v3n93innutshell = actor.Spawn("Trash", (screenXRight - 100.0, random(-screenYDown * 1/2, screenYDown), screenborder[3].z));
+            if(!r3v3n93innutshell)
+                debug.LogError(self.GetClassName().." : Trash not spawned!");
+            r3v3n93innutshell.vel.x = -10.0;
+            setSpawngap();
+        }
     }
 }

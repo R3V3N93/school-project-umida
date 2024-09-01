@@ -10,6 +10,7 @@
 	or anything).
 	
 	*/
+// Not only it primarily manages the harpoon actor, but also it helps some of projections.
 
 class Harpoon : EventHandler 
 {
@@ -40,7 +41,7 @@ class Harpoon : EventHandler
 	
 	protected transient Cvar		cvar_renderer;
 	protected bool					can_project;
-
+	
 	override void WorldThingSpawned(WorldEvent e)
 	{
 		if(e.Thing is 'HarpoonObj')
@@ -101,12 +102,15 @@ class Harpoon : EventHandler
 		proj.CacheCustomResolution(window_resolution);
 		proj.CacheFov(player.fov);
 		proj.OrientForPlayer(player);
+
 		proj.BeginDeprojection();
-		//diff = proj.DeprojectScreenToDiff(cursor_pos);
+		cursor_pos_3d = proj.DeprojectScreenToWorld(cursor_pos);
+		Handler(Eventhandler.Find("Handler")).screenBorder[0] = (proj.DeprojectScreenToWorld((0, 0)));
+		Handler(Eventhandler.Find("Handler")).screenBorder[1] = (proj.DeprojectScreenToWorld((window_resolution.x, 0)));
+		Handler(Eventhandler.Find("Handler")).screenBorder[2] = (proj.DeprojectScreenToWorld((0, window_resolution.y)));
+		Handler(Eventhandler.Find("Handler")).screenBorder[3] = (proj.DeprojectScreenToWorld((window_resolution.x, window_resolution.y)));
 
 		proj.BeginProjection();
-
-		cursor_pos_3d = DeprojectScreenToWorld(cursor_pos);
 
 		if(harpoon)
 		{
@@ -127,18 +131,6 @@ class Harpoon : EventHandler
 			}
 			
 			harpoon.angle = atan2(-(cursor_pos.x - Screen.GetWidth() / 2.0), -(cursor_pos.y -  harpoonLoc.y)) + 90;
-
-			debug.AddMInfoItem(self.GetClassName().." : angle = "..harpoon.angle);
-
-			int c = cos(harpoon.angle);
-			int s = sin(harpoon.angle);
-
-			Vector3 harpoonFinalLoc = harpoon_pos + (dist3D * s, -dist3D * c, 0);
-
-			debug.AddMInfoItem(self.GetClassName().." : harpoon_pos = "..harpoon_pos);
-			debug.AddMInfoItem(self.GetClassName().." : harpoonFinalLoc = "..harpoonFinalLoc);
-
-			harpoon.SetOrigin(harpoonFinalLoc, true);
 		}	
 	}
 	

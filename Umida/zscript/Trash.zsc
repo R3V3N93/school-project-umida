@@ -1,0 +1,24 @@
+class Trash : Actor
+{
+    int weight;
+    Property Weight : weight;
+    Default
+    {
+        Height 100;
+        Radius 50;
+        Trash.Weight 100;
+        +NOFRICTION;
+    }
+    States
+    {
+        Spawn:
+            TRSH A 1
+            {
+                if(self.pos.x <= Handler(EventHandler.Find("Handler")).screenXLeft)
+                {
+                    self.destroy();
+                }
+            }
+            Loop;
+    }
+}

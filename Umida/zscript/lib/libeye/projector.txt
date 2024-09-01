@@ -190,4 +190,12 @@ class Le_ProjScreen {
 	double Distance () const {
 		return diff.length();
 	}
+
+	// R3V : Why kd didn't make these function by default, but oh well
+
+	virtual vector3 DiffToWorld(vector3 diff) {}
+	virtual vector3 DeprojectScreenToWorld(vector2 screen_pos)
+	{
+		return DiffToWorld(DeprojectScreenToDiff(screen_pos));
+	}
 }

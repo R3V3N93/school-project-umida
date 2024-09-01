@@ -147,4 +147,29 @@ class Le_GlScreen : Le_ProjScreen {
 			normal_pos.x * right_out +
 			normal_pos.y * down_out);
 	}
+
+	override vector3 DiffToWorld(vector3 diff)
+	{
+		// r3v : I left these kd comments, since they look rad
+		// I'm still not sure how to make one for planar. No idea what that is even.
+
+		// kd: Find something under the cursor, maybe. Tell everybody who is
+		// interested.
+		FlineTraceData data;
+		
+		// kd: Note diff isn't necessarily a unit vector. If you look straight
+		// up, it is squished by pixel stretch...
+		let cursor_ang	=  VectorAngle(diff.x, diff.y);
+		let cursor_vang	= -VectorAngle(diff.xy.length(), diff.z);
+
+		players[ConsolePlayer].mo.LineTrace(
+			cursor_ang,
+			25000.13376669,
+			cursor_vang,
+			TRF_THRUBLOCK | TRF_THRUHITSCAN,
+			offsetz: players[ConsolePlayer].viewheight,
+			data: data);
+
+		return data.hitlocation;
+	}
 }

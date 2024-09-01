@@ -40,13 +40,6 @@ class Harpoon : EventHandler
 	
 	protected transient Cvar		cvar_renderer;
 	protected bool					can_project;
-	
-	vector3 diff;
-	
-	vector3 CursorDirection () const 
-	{
-		return diff;
-	}
 
 	override void WorldThingSpawned(WorldEvent e)
 	{
@@ -109,11 +102,11 @@ class Harpoon : EventHandler
 		proj.CacheFov(player.fov);
 		proj.OrientForPlayer(player);
 		proj.BeginDeprojection();
-		diff = proj.DeprojectScreenToDiff(cursor_pos);
+		//diff = proj.DeprojectScreenToDiff(cursor_pos);
 
 		proj.BeginProjection();
 
-		cursor_pos_3d = DiffToWorld(diff);
+		cursor_pos_3d = DeprojectScreenToWorld(cursor_pos);
 
 		if(harpoon)
 		{

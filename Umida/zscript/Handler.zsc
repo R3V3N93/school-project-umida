@@ -13,6 +13,10 @@ class Handler : EventHandler
     int gamestate;
     int timer; // tic
     int spawngap; // tic
+    int score;
+    int combo;
+    int combotimer; // tic
+    double health;
 
     override void PlayerSpawned(PlayerEvent e)
     {
@@ -28,10 +32,21 @@ class Handler : EventHandler
         return;
     }
 
+    void damagePlayer()
+    {
+        self.health -= Cvar.GetCVar("sv_health_max").GetDouble() / 4.0;
+    }
+
+    void healPlayer(double health)
+    {
+        self.health += health;
+    }
+
     override void OnRegister () 
 	{
 		debug = DebugInfo(Eventhandler.Find("Debuginfo"));
         setSpawngap();
+        self.health = Cvar.GetCVar("sv_health_max").GetDouble();
 	}
 
     override void WorldTick()
@@ -53,7 +68,15 @@ class Handler : EventHandler
             if(!r3v3n93innutshell)
                 debug.LogError(self.GetClassName().." : Trash not spawned!");
             r3v3n93innutshell.vel.x = -10.0;
+            r3v3n93innutshell.game = self;
+
             setSpawngap();
+        }
+
+        if(combotimer > 0) 
+        {
+            combotimer--;
+            debug.AddMInfoItem(self.GetClassName().." : Combo Timer = "..combotimer);
         }
     }
 }

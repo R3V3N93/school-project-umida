@@ -191,12 +191,17 @@ class Le_ProjScreen {
 		return diff.length();
 	}
 
-	// R3V : Why kd didn't make these function by default, but oh well
+	// R3V : Why kd didn't make these functions by default, but oh well
 
 	virtual play vector3 DiffToWorld(vector3 diff) { return (0, 0, 0 ); }
 	virtual play vector3 DeprojectScreenToWorld(vector2 screen_pos)
 	{
 		return DiffToWorld(DeprojectScreenToDiff(screen_pos));
+	}
+	virtual play Actor DiffToActor(vector3 diff) { return null; }
+	virtual play Actor DeprojectScreenToActor(vector2 screen_pos)
+	{
+		return DiffToActor(DeprojectScreenToDiff(screen_pos));
 	}
 	/*
 	virtual play vector3 DeprojectNormalToWorld(vector2 screen_pos)

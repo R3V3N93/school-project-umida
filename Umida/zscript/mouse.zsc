@@ -23,8 +23,9 @@ class Harpoon : EventHandler
 	
 	Playerinfo p;
 
-	vector2				cursor_pos;
+	vector2 cursor_pos;
 	vector3 cursor_pos_3d;
+	Actor cursor_actor;
 	protected vector2				resolution;
 	protected vector2				window_resolution;
 	protected vector2				cursor_tl;
@@ -50,27 +51,13 @@ class Harpoon : EventHandler
 			self.harpoon_pos = harpoon.pos;
 		}
 	}
-	
-	vector3 DiffToWorld(vector3 diff)
+
+	Actor pickUpTrash()
 	{
-		// kd: Find something under the cursor, maybe. Tell everybody who is
-		// interested.
-		FlineTraceData data;
+		if(cursor_actor is 'Trash')
+			return cursor_actor;
 		
-		// kd: Note diff isn't necessarily a unit vector. If you look straight
-		// up, it is squished by pixel stretch...
-		let cursor_ang	=  VectorAngle(diff.x, diff.y);
-		let cursor_vang	= -VectorAngle(diff.xy.length(), diff.z);
-
-		p.mo.LineTrace(
-			cursor_ang,
-			25000.13376669,
-			cursor_vang,
-			TRF_THRUBLOCK | TRF_THRUHITSCAN,
-			offsetz: p.viewheight,
-			data: data);
-
-		return data.hitlocation;
+		return null;
 	}
 
 	override void WorldTick () 
@@ -109,6 +96,7 @@ class Harpoon : EventHandler
 		Handler(Eventhandler.Find("Handler")).screenBorder[1] = (proj.DeprojectScreenToWorld((window_resolution.x, 0)));
 		Handler(Eventhandler.Find("Handler")).screenBorder[2] = (proj.DeprojectScreenToWorld((0, window_resolution.y)));
 		Handler(Eventhandler.Find("Handler")).screenBorder[3] = (proj.DeprojectScreenToWorld((window_resolution.x, window_resolution.y)));
+		cursor_actor = proj.DeprojectScreenToActor(cursor_pos);
 
 		proj.BeginProjection();
 

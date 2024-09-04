@@ -1,6 +1,8 @@
 class UmidaPlayer : PlayerPawn
 {
 	Debuginfo debug;
+	Handler game;
+	Harpoon mouse;
 	Default
 	{
 		Speed 1;
@@ -22,7 +24,9 @@ class UmidaPlayer : PlayerPawn
 	override void PostBeginPlay()
 	{	
 		super.PostBeginPlay();
+		game = Handler(EventHandler.Find("Handler"));
 		debug = Debuginfo(EventHandler.Find("Debuginfo"));
+		mouse = Harpoon(Eventhandler.Find("Harpoon"));
 	}
 
 	override void Tick()
@@ -30,12 +34,18 @@ class UmidaPlayer : PlayerPawn
 		super.Tick();
 		if(player.cmd.Buttons & BT_USE)
 		{
-			debug.LogDebug(self.GetClassName().." : Spawned test object at ");
-			vector3 dest = Harpoon(EventHandler.Find("Harpoon")).cursor_pos_3d;
-			if(Spawn("AllWeHadToDoWasToFollowTheDamnBoatCJ", dest))
+			self.tracer = mouse.pickUpTrash();
+			if(tracer)
 			{
-				debug.LogDebug(self.GetClassName().." : Spawned test object at "..dest);
+				debug.LogDebug(self.GetClassName().." : Picked up a trash at "..tracer.pos);
+				self.tracer.vel.x = 0;
 			}
+		}
+
+		if(tracer)
+		{
+			game.grantScore(Trash(tracer).timer);
+			tracer.destroy();
 		}
 	}
 

@@ -44,7 +44,7 @@ if errorlevel 1 (
 
 echo Folder "%folderName%" has been successfully zipped and renamed to "%renamedZipFileName%".
 
-C:\GZDOOM\gzdoom.exe -iwad Umida.ipk3 -logfile C:\Users\user\Documents\Projects\umida\log.txt
+C:\GZDOOM\gzdoom.exe -iwad Umida.ipk3 +logfile log.txt
 
 endlocal
 exit /b 0

@@ -2,17 +2,19 @@ class MyStandaloneGameHUD : BaseStatusBar
 {
 	HUDFont mHUDFont;
 	UmidaPlayer pmo;
+	Handler game;
 
 	override void Init(void)
 	{
 		Super.Init();
-		SetSize(0, 320, 200);
+		SetSize(0, Screen.GetWidth(), Screen.GetHeight());
 		Font fnt = SmallFont;
 		mHUDFont = HUDFont.Create(fnt, fnt.GetCharWidth("0"), Mono_CellLeft, 1, 1);
 	}
 
 	override void Draw(int state, double TicFrac)
 	{
+		self.game = Handler(EventHandler.Find("Handler"));
 		if (CPlayer && CPlayer.mo)
 		{
 			pmo = UmidaPlayer(CPlayer.mo);
@@ -23,13 +25,13 @@ class MyStandaloneGameHUD : BaseStatusBar
 		if (state == HUD_StatusBar || state == HUD_Fullscreen)
 		{
 			BeginHUD(forcescaled: true);
-
-			DrawHealth();
+			if(game)
+				DrawScore();
 		}
 	}
 
-	void DrawHealth(void)
+	void DrawScore(void)
 	{
-		DrawString(mHUDFont, StringTable.Localize("$TXT_HUD_HEALTH") .. FormatNumber(pmo.player.health, 3), (44, -20));
+		DrawString(mHUDFont, "Score : "..int(game.score), (Screen.GetWidth() / 8, Screen.GetHeight() / 8));
 	}
 }

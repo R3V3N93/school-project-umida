@@ -1,20 +1,37 @@
 class Trash : Actor
 {
     int weight;
+    int timer; // tic
+    int gauge;
     Property Weight : weight;
+    Handler game;
     Default
     {
         Height 100;
         Radius 50;
         Trash.Weight 100;
         +NOFRICTION;
+        -SOLID;
+        +SHOOTABLE;
+    }
+
+    override void PostBeginPlay()
+    {
+        super.PostBeginPlay();
+        game = Handler(EventHandler.Find("Handler"));
+    }
+
+    override void Tick()
+    {
+        super.Tick();
+        self.timer--;
     }
     States
     {
         Spawn:
             TRSH A 1
             {
-                if(self.pos.x <= Handler(EventHandler.Find("Handler")).screenXLeft)
+                if(self.pos.x <= game.screenXLeft)
                 {
                     self.destroy();
                 }

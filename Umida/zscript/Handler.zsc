@@ -4,6 +4,7 @@ class Handler : EventHandler
     //01
     //23
     Vector3 screenBorder[4];
+    Harpoon mouse;
 
     double screenXLeft;
     double screenXRight;
@@ -34,7 +35,7 @@ class Handler : EventHandler
 
     void damagePlayer()
     {
-        self.health -= Cvar.GetCVar("sv_health_max").GetDouble() / 4.0;
+        self.health -= Cvar.GetCVar("sv_health_max").GetFloat() / 4.0;
     }
 
     void healPlayer(double health)
@@ -42,11 +43,18 @@ class Handler : EventHandler
         self.health += health;
     }
 
+    void grantScore(int selftimer)
+    {
+        score++;
+        return;
+    }
+
     override void OnRegister () 
 	{
 		debug = DebugInfo(Eventhandler.Find("Debuginfo"));
         setSpawngap();
-        self.health = Cvar.GetCVar("sv_health_max").GetDouble();
+        self.health = Cvar.GetCVar("sv_health_max").GetFloat();
+        mouse = Harpoon(Eventhandler.Find("Harpoon"));
 	}
 
     override void WorldTick()
@@ -68,7 +76,7 @@ class Handler : EventHandler
             if(!r3v3n93innutshell)
                 debug.LogError(self.GetClassName().." : Trash not spawned!");
             r3v3n93innutshell.vel.x = -10.0;
-            r3v3n93innutshell.game = self;
+            Trash(r3v3n93innutshell).game = self;
 
             setSpawngap();
         }

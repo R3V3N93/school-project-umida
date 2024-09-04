@@ -1,4 +1,4 @@
 user bool cl_starcraft_debug = false;
 
 
-server noarchive double sv_health_max = 100.0;
+server noarchive float sv_health_max = 100.0;

@@ -44,8 +44,8 @@ class UmidaPlayer : PlayerPawn
 
 		if(tracer)
 		{
-			game.grantScore(Trash(tracer).timer);
-			tracer.destroy();
+			//game.grantScore(Trash(tracer).timer);
+			//tracer.destroy();
 		}
 	}
 

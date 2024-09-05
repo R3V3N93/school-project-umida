@@ -21,6 +21,8 @@ class Handler : EventHandler
 
     override void PlayerSpawned(PlayerEvent e)
     {
+        if(Level.Mapname == "TEST")
+            return;
         Playerinfo p = players[e.PlayerNumber];
         p.mo.SetOrigin(p.mo.pos + (0, 0, 500), false);
 		p.cheats |= CF_TOTALLYFROZEN;
@@ -51,7 +53,7 @@ class Handler : EventHandler
 
     override void OnRegister () 
 	{
-		debug = DebugInfo(Eventhandler.Find("Debuginfo"));
+        debug = DebugInfo(Eventhandler.Find("Debuginfo"));
         setSpawngap();
         self.health = Cvar.GetCVar("sv_health_max").GetFloat();
         mouse = Harpoon(Eventhandler.Find("Harpoon"));

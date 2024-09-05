@@ -5,6 +5,7 @@ class Trash : Actor
     int gauge;
     Property Weight : weight;
     Handler game;
+    Harpoon mouse;
     Default
     {
         Height 100;
@@ -19,6 +20,7 @@ class Trash : Actor
     {
         super.PostBeginPlay();
         game = Handler(EventHandler.Find("Handler"));
+        mouse = Harpoon(Eventhandler.Find("Harpoon"));
     }
 
     override void Tick()
@@ -33,9 +35,55 @@ class Trash : Actor
             {
                 if(self.pos.x <= game.screenXLeft)
                 {
+                    game.damagePlayer();
                     self.destroy();
                 }
+
+                if(self.vel.x == 0)
+                {
+                    if(mouse.cursor_actor != self)
+                        self.vel.x = -10.0;
+                }
             }
+            Loop;
+    }
+}
+
+class TrashGauge : Actor
+{
+    Default
+    {
+        Height 100;
+        Radius 50;
+        +FLATSPRITE;
+        +NOGRAVITY;
+        +NOBLOCKMAP;
+    }
+
+    override void Tick()
+    {
+        if(master)
+            self.pos.z = master.height;
+    }
+
+    States
+    {
+        Spawn:
+            GAUG A 1;
+            Loop;
+    }
+}
+
+class TrashGaugeValue : TrashGauge
+{
+    override void Tick()
+    {
+        super.Tick();
+    }
+    States
+    {
+        Spawn:
+            GAUG B 1;
             Loop;
     }
 }

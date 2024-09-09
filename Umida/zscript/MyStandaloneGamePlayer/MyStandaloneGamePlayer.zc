@@ -32,20 +32,27 @@ class UmidaPlayer : PlayerPawn
 	override void Tick()
 	{
 		super.Tick();
-		if(player.cmd.Buttons & BT_USE)
+		if(player.cmd.Buttons & BT_USE && !(player.Original_OldButtons & BT_USE))
 		{
-			self.tracer = mouse.pickUpTrash();
+			if(mouse.pickUpTrash())
+			{
+				if(!self.tracer)
+					self.tracer = mouse.pickUpTrash();
+			}
+			
 			if(tracer)
 			{
 				debug.LogDebug(self.GetClassName().." : Picked up a trash at "..tracer.pos);
 				self.tracer.vel.x = 0;
+				Trash(self.tracer).gauge -= 10;
 			}
 		}
 
 		if(tracer)
 		{
 			//game.grantScore(Trash(tracer).timer);
-			//tracer.destroy();
+			if(!mouse.pickUpTrash())
+				self.tracer = null;
 		}
 	}
 

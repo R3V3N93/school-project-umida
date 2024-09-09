@@ -36,9 +36,10 @@ class Harpoon : EventHandler
 	protected double				min_vang;
 	protected double				max_vang;
 	
-	protected Le_ProjScreen			proj;
-	protected Le_GlScreen			gl_proj;
-	protected Le_SwScreen			sw_proj;
+	Le_ProjScreen			proj;
+	Le_GlScreen			gl_proj;
+	Le_viewport 		viewport;
+	Le_SwScreen			sw_proj;
 	
 	protected transient Cvar		cvar_renderer;
 	protected bool					can_project;
@@ -181,6 +182,7 @@ class Harpoon : EventHandler
 	}
 	
 	override void RenderOverlay (RenderEvent event) {
+		viewport.FromHud();
 		let window_to_screen	= (
 			resolution.x / window_resolution.x,
 			resolution.y / window_resolution.y);

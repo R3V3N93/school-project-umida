@@ -1,5 +1,11 @@
 class HarpoonObj : Actor
 {
+    DebugInfo debug;
+
+    Handler game;
+    Harpoon mouse;
+    Vector3 oldpos;
+    int oldangle;
     default
     {
         Height 10;
@@ -7,9 +13,40 @@ class HarpoonObj : Actor
         //+NOBLOCKMAP;
     }
 
+    override void PostBeginPlay()
+    {
+        super.PostBeginPlay();
+        game = Handler(EventHandler.Find("Handler"));
+        mouse = Harpoon(Eventhandler.Find("Harpoon"));
+        debug = DebugInfo(Eventhandler.Find("Debuginfo"));
+    }
+
+    override void BeginPlay()
+    {
+        self.oldpos = pos;
+        debug.LogDebug(self.GetClassName()..".oldpos = "..oldpos);
+        debug.LogDebug(self.GetClassName()..".pos = "..pos);
+    }
+
+    override void tick()
+    {
+        super.tick();
+        if(game.player.mo.tracer)
+        {
+            self.angle = oldangle;
+            self.SetOrigin(game.player.mo.tracer.pos, false);
+        }
+        else
+        {
+            oldangle = angle;
+            self.SetOrigin(oldpos, false);
+        }
+    }
+    
     States
     {
         Spawn:
+            TNT1 A 0;
             BOSS A 1;
             Loop;
     }

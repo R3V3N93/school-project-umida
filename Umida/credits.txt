@@ -45,3 +45,9 @@ sp_usimp.txt contains the following permissions:
 Authors MAY use the contents of this file as a base for modification or
 reuse.  Permissions have been obtained from original authors for any of
 their resources modified or included in this file.
+
+
+Models
+{
+	boat.md3 - boat_fishing01.mdl (Half-Life 2)
+}

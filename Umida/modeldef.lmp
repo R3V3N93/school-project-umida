@@ -1,1 +1,3 @@
 #include "models/definitions/debug.mdl"
+#include "models/definitions/boat.mdl"
+#include "models/definitions/anchor.mdl"

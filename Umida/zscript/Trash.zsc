@@ -1,16 +1,20 @@
 class Trash : Actor
 {
-    int weight;
+    DebugInfo debug;
     int timer; // tic
+    int stoptimer; //tic
     int gauge;
-    Property Weight : weight;
+    int score;
+    Property Weight : gauge;
+    Property Score : score;
     Handler game;
     Harpoon mouse;
     Default
     {
-        Height 100;
-        Radius 50;
-        Trash.Weight 100;
+        Height 10;
+        Radius 100;
+        Trash.Weight 50;
+        Trash.Score 100;
         +NOFRICTION;
         -SOLID;
         +SHOOTABLE;
@@ -21,69 +25,51 @@ class Trash : Actor
         super.PostBeginPlay();
         game = Handler(EventHandler.Find("Handler"));
         mouse = Harpoon(Eventhandler.Find("Harpoon"));
+        debug = DebugInfo(Eventhandler.Find("Debuginfo"));
     }
 
     override void Tick()
     {
         super.Tick();
-        self.timer--;
+        debug.AddMInfoItem(self.GetClassName()..".timer = "..self.timer);
+        self.timer++;
+
+        if(self.pos.x <= game.screenXLeft)
+        {
+            game.damagePlayer();
+            self.destroy();
+        }
+
+        if(self.vel.x == 0 || mouse.cursor_actor != self)
+        {
+            /*if(mouse.cursor_actor != self)
+                self.vel.x = -10.0;*/
+            stoptimer++;
+            if(stoptimer >= 35)
+                self.vel.x = -10;
+        }
+        else
+            stoptimer = 0;
+        
+        if(self.gauge <= 0)
+        {
+            game.grantScore(self.timer, self.score);
+            self.destroy();
+        }
+
+        if(self.gauge < self.default.gauge)
+        {   
+            self.gauge++;
+            
+        }
     }
     States
     {
         Spawn:
             TRSH A 1
             {
-                if(self.pos.x <= game.screenXLeft)
-                {
-                    game.damagePlayer();
-                    self.destroy();
-                }
-
-                if(self.vel.x == 0)
-                {
-                    if(mouse.cursor_actor != self)
-                        self.vel.x = -10.0;
-                }
+                
             }
-            Loop;
-    }
-}
-
-class TrashGauge : Actor
-{
-    Default
-    {
-        Height 100;
-        Radius 50;
-        +FLATSPRITE;
-        +NOGRAVITY;
-        +NOBLOCKMAP;
-    }
-
-    override void Tick()
-    {
-        if(master)
-            self.pos.z = master.height;
-    }
-
-    States
-    {
-        Spawn:
-            GAUG A 1;
-            Loop;
-    }
-}
-
-class TrashGaugeValue : TrashGauge
-{
-    override void Tick()
-    {
-        super.Tick();
-    }
-    States
-    {
-        Spawn:
-            GAUG B 1;
             Loop;
     }
 }

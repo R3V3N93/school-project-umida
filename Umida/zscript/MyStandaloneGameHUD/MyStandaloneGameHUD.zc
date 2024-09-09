@@ -1,8 +1,17 @@
+class TrashGauge ui
+{
+	int x;
+	int y;
+	int cur;
+	int max;
+}
+
 class MyStandaloneGameHUD : BaseStatusBar
 {
 	HUDFont mHUDFont;
 	UmidaPlayer pmo;
 	Handler game;
+	Debuginfo debug;
 
 	override void Init(void)
 	{
@@ -10,6 +19,7 @@ class MyStandaloneGameHUD : BaseStatusBar
 		SetSize(0, Screen.GetWidth(), Screen.GetHeight());
 		Font fnt = SmallFont;
 		mHUDFont = HUDFont.Create(fnt, fnt.GetCharWidth("0"), Mono_CellLeft, 1, 1);
+		debug = Debuginfo(EventHandler.Find("Debuginfo"));
 	}
 
 	override void Draw(int state, double TicFrac)
@@ -26,12 +36,29 @@ class MyStandaloneGameHUD : BaseStatusBar
 		{
 			BeginHUD(forcescaled: true);
 			if(game)
+			{
 				DrawScore();
+				DrawTrashGauge();
+			}
 		}
 	}
 
 	void DrawScore(void)
 	{
 		DrawString(mHUDFont, "Score : "..int(game.score), (Screen.GetWidth() / 8, Screen.GetHeight() / 8));
+	}
+
+	void DrawTrashGauge()
+	{
+		for(int i = 0; i < game.trashes.size(); i++)
+		{
+			if(game.trashes[i])
+			{
+				TrashGauge shit = game.getTrashGauge(game.trashes[i]); //best var name ever
+				if(shit)
+					//DrawString(mHUDFont, "gauge : "..shit.cur.." / "..shit.max, (shit.x, shit.y));
+					DrawBar("graphics/gauge.png", "graphics/gaugebg.png", shit.cur, shit.max, (shit.x, shit.y), 0, SHADER_VERT|SHADER_REVERSE, DI_SCREEN_TOP|DI_ITEM_BOTTOM|DI_ITEM_CENTER, 1.0);
+			}
+		}
 	}
 }

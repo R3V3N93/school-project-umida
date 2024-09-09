@@ -10,7 +10,8 @@ class AllWeHadToDoWasToFollowTheDamnBoatCJ : Actor
     States
     {
         Spawn:
-            PLAY A 1;
+            TNT1 A 0;
+            BOAT A 1;
             Loop;
     }
 }

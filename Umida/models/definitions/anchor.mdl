@@ -1,0 +1,10 @@
+Model HarpoonOBJ // yep. it's anchor, not harpoon FFS!
+{
+    Path "Models/anchor"
+	Model 0 "anchor.iqm"
+	Skin 0 "anchor.png"
+	Scale 3.0 3.0 3.0
+    //Offset 0 0 150
+	AngleOffset -90
+	FrameIndex BOSS A 0 0
+}

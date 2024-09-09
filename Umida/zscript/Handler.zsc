@@ -6,6 +6,10 @@ class Handler : EventHandler
     Vector3 screenBorder[4];
     Harpoon mouse;
 
+    Playerinfo player;
+
+    Array<Trash> trashes;
+
     double screenXLeft;
     double screenXRight;
     double screenYUp;
@@ -27,6 +31,7 @@ class Handler : EventHandler
         p.mo.SetOrigin(p.mo.pos + (0, 0, 500), false);
 		p.cheats |= CF_TOTALLYFROZEN;
 		p.mo.Pitch = 90;
+        self.player = p;
     }
 
     void setSpawngap()
@@ -44,10 +49,10 @@ class Handler : EventHandler
     {
         self.health += health;
     }
-
-    void grantScore(int selftimer)
+    
+    void grantScore(int selftimer, int givenscore)
     {
-        score++;
+        self.score += (givenscore - 23 * log(selftimer-9));
         return;
     }
 
@@ -56,11 +61,47 @@ class Handler : EventHandler
         debug = DebugInfo(Eventhandler.Find("Debuginfo"));
         setSpawngap();
         self.health = Cvar.GetCVar("sv_health_max").GetFloat();
-        mouse = Harpoon(Eventhandler.Find("Harpoon"));
+        
 	}
+
+    override void InterfaceProcess(ConsoleEvent e)
+    {
+        Array<String> args;
+        e.name.split(args, "|");
+        
+        if(args[0] == "Trash")
+        {
+            
+        }
+    }
+
+    ui TrashGauge getTrashGauge(Trash trsh)
+    {
+        if(trsh.gauge < trsh.default.gauge)
+        {
+            TrashGauge temp = TrashGauge(new('TrashGauge'));
+                
+            temp.cur = trsh.gauge;
+            temp.max = trsh.default.gauge;
+
+            Vector2 finalLocationForGauge;
+            if(mouse)
+            {
+                mouse.proj.ProjectWorldPos((trsh.pos.x, trsh.pos.y, trsh.pos.z));
+                finalLocationForGauge = mouse.proj.ProjectToScreen();
+            }
+            //debug.AddMInfoItem(self.GetClassName()..".getTrashGauge().finalLocationForGauge : "..finalLocationForGauge, "handler.getTrashGauge.finalloc");
+            temp.x = finalLocationForGauge.x;
+            temp.y = finalLocationForGauge.y;
+
+            return temp;
+        }
+        return null;
+    }
 
     override void WorldTick()
     {
+        mouse = Harpoon(Eventhandler.Find("Harpoon"));
         debug.AddMInfoItem(self.GetClassName().." : Screen left top = "..screenBorder[0]);
         debug.AddMInfoItem(self.GetClassName().." : Screen Right top = "..screenBorder[1]);
         debug.AddMInfoItem(self.GetClassName().." : Screen left bottom = "..screenBorder[2]);
@@ -71,6 +112,7 @@ class Handler : EventHandler
         screenYDown = screenBorder[3].y;
 
         debug.AddMInfoItem(self.GetClassName().." : spawngap = "..spawngap);
+        debug.AddMInfoItem(self.GetClassName()..".trashes.size() = "..trashes.size());
         spawngap--;
         if(spawngap <= 0)
         {   
@@ -79,7 +121,7 @@ class Handler : EventHandler
                 debug.LogError(self.GetClassName().." : Trash not spawned!");
             r3v3n93innutshell.vel.x = -10.0;
             Trash(r3v3n93innutshell).game = self;
-
+            trashes.push(Trash(r3v3n93innutshell));
             setSpawngap();
         }
 

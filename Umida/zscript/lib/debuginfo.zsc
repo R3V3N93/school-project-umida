@@ -40,6 +40,11 @@ Class Debuginfo : EventHandler
         Harpoon hpoon = Harpoon(EventHandler.Find("Harpoon"));
         AddPInfoItem(String.Format("Mouse Position : %f | %f | %f", hpoon.cursor_pos_3d.x, hpoon.cursor_pos_3d.y, hpoon.cursor_pos_3d.z), "player_info_pos");  
         AddPInfoItem(String.Format("Mouse Position 2D : %f | %f", hpoon.cursor_pos.x, hpoon.cursor_pos.y), "player_info_pos_real");  
+        if(p)
+        {
+         if(p.tracer)
+             AddPInfoItem(String.Format("Tracer : %s", p.tracer.GetClassName(), "player_info_pos_real"));  
+        }
     }
 
     override void RenderOverlay (RenderEvent event) 

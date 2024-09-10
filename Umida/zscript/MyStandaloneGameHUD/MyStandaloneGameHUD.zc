@@ -37,21 +37,19 @@ class MyStandaloneGameHUD : BaseStatusBar
 			BeginHUD(forcescaled: true);
 			if(game)
 			{
-				DrawScore();
 				DrawTrashGauge();
-				DrawHealth();
+				DrawLeftTop();
 				DrawCombo();
 			}
 		}
 	}
 
-	void DrawScore(void)
+	void DrawLeftTop(int offsetx = 0, int offsety = 0)
 	{
+		int x = 280 * Screen.GetWidth() / 1920;
+		int yHealth = 90 * Screen.GetHeight() / 1080;
+		DrawBar("graphics/health.png", "graphics/healthbg.png", game.health, Cvar.GetCVar("sv_health_max").GetFloat(), (x, yHealth), 0, 0, DI_SCREEN_LEFT_TOP|DI_ITEM_CENTER, 1.0);	
 		DrawString(mHUDFont, "Score : "..int(game.score), (Screen.GetWidth() / 8, Screen.GetHeight() / 8));
-	}
-
-	void DrawHealth(void)
-	{
 		DrawString(mHUDFont, "Health : "..int(game.health), (Screen.GetWidth() / 8, Screen.GetHeight() / 8 + mHUDFont.mfont.GetHeight()));
 	}
 

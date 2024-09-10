@@ -51,7 +51,7 @@ class UmidaPlayer : PlayerPawn
 		if(tracer)
 		{
 			//game.grantScore(Trash(tracer).timer);
-			if(!mouse.pickUpTrash())
+			if(!mouse.pickUpTrash() || Trash(self.tracer).gauge >= Trash(self.tracer).default.gauge)
 				self.tracer = null;
 		}
 	}

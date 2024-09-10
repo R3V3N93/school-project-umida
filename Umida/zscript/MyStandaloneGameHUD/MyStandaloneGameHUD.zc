@@ -39,6 +39,8 @@ class MyStandaloneGameHUD : BaseStatusBar
 			{
 				DrawScore();
 				DrawTrashGauge();
+				DrawHealth();
+				DrawCombo();
 			}
 		}
 	}
@@ -46,6 +48,17 @@ class MyStandaloneGameHUD : BaseStatusBar
 	void DrawScore(void)
 	{
 		DrawString(mHUDFont, "Score : "..int(game.score), (Screen.GetWidth() / 8, Screen.GetHeight() / 8));
+	}
+
+	void DrawHealth(void)
+	{
+		DrawString(mHUDFont, "Health : "..int(game.health), (Screen.GetWidth() / 8, Screen.GetHeight() / 8 + mHUDFont.mfont.GetHeight()));
+	}
+
+	void DrawCombo(void)
+	{
+		if(game.combo > 0)
+			DrawString(mHUDFont, "Combo : "..int(game.combo), (Screen.GetWidth() / 2, Screen.GetHeight() / 8));
 	}
 
 	void DrawTrashGauge()

@@ -36,7 +36,7 @@ class Handler : EventHandler
 
     void setSpawngap()
     {
-        spawngap = random(5, 70);
+        spawngap = random(10, 70);
         return;
     }
 
@@ -52,8 +52,20 @@ class Handler : EventHandler
     
     void grantScore(int selftimer, int givenscore)
     {
-        self.score += (givenscore - 23 * log(selftimer-9));
+        self.score += (givenscore - 23 * log10(selftimer-9)); // needs to be revised!
         return;
+    }
+
+    void doCombo()
+    {
+        combotimer = 0;
+        combo++;
+    }
+
+    void stopCombo()
+    {
+        combotimer = 0;
+        combo = 0;
     }
 
     override void OnRegister () 
@@ -119,16 +131,20 @@ class Handler : EventHandler
             Actor r3v3n93innutshell = actor.Spawn("Trash", (screenXRight - 100.0, random(-screenYDown * 1/2, screenYDown), screenborder[3].z));
             if(!r3v3n93innutshell)
                 debug.LogError(self.GetClassName().." : Trash not spawned!");
-            r3v3n93innutshell.vel.x = -10.0;
+            Trash(r3v3n93innutshell).accel();
             Trash(r3v3n93innutshell).game = self;
             trashes.push(Trash(r3v3n93innutshell));
             setSpawngap();
         }
 
-        if(combotimer > 0) 
+        if(combo > 0) 
         {
-            combotimer--;
+            combotimer++;
             debug.AddMInfoItem(self.GetClassName().." : Combo Timer = "..combotimer);
+            if(combotimer >= 105)
+            {
+                stopCombo();
+            }
         }
     }
 }

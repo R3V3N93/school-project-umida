@@ -118,8 +118,9 @@ class Harpoon : EventHandler
 				// 10.8 == 1080 / 100
 				dist = Screen.GetHeight() / 10.8;
 			}
-			
-			harpoon.angle = atan2(-(cursor_pos.x - Screen.GetWidth() / 2.0), -(cursor_pos.y -  harpoonLoc.y)) + 90;
+			double angle = atan2(-(cursor_pos.x - Screen.GetWidth() / 2.0), -(cursor_pos.y -  harpoonLoc.y)) + 90;
+			if((180 >= angle && angle <= 360) || (angle >= 0 || angle <= 90))
+				harpoon.angle = angle;
 		}	
 	}
 	

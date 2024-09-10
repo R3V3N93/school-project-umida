@@ -5,16 +5,19 @@ class Trash : Actor
     int stoptimer; //tic
     int gauge;
     int score;
+    int velocity;
     Property Weight : gauge;
     Property Score : score;
+    Property Speed : velocity;
     Handler game;
     Harpoon mouse;
     Default
     {
         Height 10;
         Radius 100;
-        Trash.Weight 50;
+        Trash.Weight 30;
         Trash.Score 100;
+        Trash.Speed 10;
         +NOFRICTION;
         -SOLID;
         +SHOOTABLE;
@@ -28,6 +31,11 @@ class Trash : Actor
         debug = DebugInfo(Eventhandler.Find("Debuginfo"));
     }
 
+    void accel()
+    {
+        self.vel.x = -velocity;
+    }
+
     override void Tick()
     {
         super.Tick();
@@ -37,16 +45,17 @@ class Trash : Actor
         if(self.pos.x <= game.screenXLeft)
         {
             game.damagePlayer();
+            game.stopCombo();
             self.destroy();
         }
 
-        if(self.vel.x == 0 || mouse.cursor_actor != self)
+        if(self.vel.x == 0 && game.player.mo.tracer != self)
         {
             /*if(mouse.cursor_actor != self)
                 self.vel.x = -10.0;*/
             stoptimer++;
-            if(stoptimer >= 35)
-                self.vel.x = -10;
+            if(stoptimer >= 17)
+                self.accel();
         }
         else
             stoptimer = 0;
@@ -54,6 +63,7 @@ class Trash : Actor
         if(self.gauge <= 0)
         {
             game.grantScore(self.timer, self.score);
+            game.doCombo();
             self.destroy();
         }
 

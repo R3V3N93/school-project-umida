@@ -41,6 +41,7 @@ class HarpoonObj : Actor
             oldangle = angle;
             self.SetOrigin(oldpos, false);
         }
+        debug.AddMInfoItem(self.GetClassName()..".angle : "..self.angle);
     }
     
     States

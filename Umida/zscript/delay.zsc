@@ -1,0 +1,17 @@
+//zscript add delay or sleep pls
+
+class Delayer ui
+{
+    int base;
+    int time;
+    void init(int tics)
+    {
+        base = gametic;
+        time = tics;
+    }
+
+    bool check()
+    {
+        return (gametic - base >= time);
+    }
+}

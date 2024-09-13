@@ -24,6 +24,8 @@ class Handler : EventHandler
     int combotimer; // tic
     double health;
 
+    string image;
+
     enum GAMESTATE
     {
         GAMESTATE_PREGAME,
@@ -40,6 +42,7 @@ class Handler : EventHandler
             return;
         }
         gamestate = state;
+        debug.LogError(self.GetClassName()..".setGameState() : Unknown gamestate "..state);
     }
 
     override void PlayerSpawned(PlayerEvent e)
@@ -176,5 +179,11 @@ class Handler : EventHandler
             case GAMESTATE_POSTGAME:
             case GAMESTATE_END:
         }
+    }
+
+    void Game()
+    {
+        Delayer delay = Delayer(new("Delayer"));
+        setGameState(GAMESTATE_PREGAME);    
     }
 }

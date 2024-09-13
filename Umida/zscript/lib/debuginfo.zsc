@@ -109,7 +109,7 @@ Class Debuginfo : EventHandler
 
     clearscope void LogMessage(string msg, int severity)
     {
-        if(Cvar.GetCvar("cl_starcraft_debug", players[ConsolePlayer]).GetBool() == true)
+        if(Cvar.GetCvar("cl_debug_log", players[ConsolePlayer]).GetBool() == true)
             console.printf(LogSeverity(severity).." : "..msg);
     }
 

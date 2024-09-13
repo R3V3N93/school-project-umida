@@ -16,12 +16,31 @@ class Handler : EventHandler
     double screenYDown;
 
     int gamestate;
+    int stage;
     int timer; // tic
     int spawngap; // tic
     int score;
     int combo;
     int combotimer; // tic
     double health;
+
+    enum GAMESTATE
+    {
+        GAMESTATE_PREGAME,
+        GAMESTATE_INGAME,
+        GAMESTATE_POSTGAME,
+        GAMESTATE_END
+    };
+
+    void setGameState(int state)
+    {
+        if(state < GAMESTATE_PREGAME || GAMESTATE_END < state)
+        {
+            debug.LogError(self.GetClassName()..".setGameState() : Unknown gamestate "..state);
+            return;
+        }
+        gamestate = state;
+    }
 
     override void PlayerSpawned(PlayerEvent e)
     {
@@ -145,6 +164,17 @@ class Handler : EventHandler
             {
                 stopCombo();
             }
+        }
+    }
+
+    override void RenderOverlay(RenderEvent e)
+    {
+        switch(gamestate)
+        {
+            case GAMESTATE_PREGAME:
+            case GAMESTATE_INGAME:
+            case GAMESTATE_POSTGAME:
+            case GAMESTATE_END:
         }
     }
 }

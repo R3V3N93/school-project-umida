@@ -21,7 +21,7 @@ maps
 				requiredarchives = "";
 			}
 		}
-		defaultfloortexture = "-NOFLAT-";
+		defaultfloortexture = "flats/f_sky1.png";
 		defaultceiltexture = "NASH_WAL";
 		defaulttoptexture = "SKY1";
 		defaultwalltexture = "SKY1";
@@ -38,9 +38,9 @@ maps
 		overrideceilheight = false;
 		overridebrightness = false;
 		uselongtexturenames = false;
-		viewpositionx = 13.44023f;
-		viewpositiony = 439.9198f;
-		viewscale = 1.85646f;
+		viewpositionx = -77.48029f;
+		viewpositiony = 7.653729f;
+		viewscale = 0.4999985f;
 		scriptcompiler = "zdoom_acs.cfg";
 		
 		grid

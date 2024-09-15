@@ -6,6 +6,8 @@ class Handler : EventHandler
     Vector3 screenBorder[4];
     Harpoon mouse;
 
+    GameScene scene;
+
     Playerinfo player;
 
     Array<Trash> trashes;
@@ -26,8 +28,9 @@ class Handler : EventHandler
 
     string image;
 
-    enum GAMESTATE
+    enum game_state
     {
+        GAMESTATE_TUTORIAL,
         GAMESTATE_PREGAME,
         GAMESTATE_INGAME,
         GAMESTATE_POSTGAME,
@@ -54,6 +57,7 @@ class Handler : EventHandler
 		p.cheats |= CF_TOTALLYFROZEN;
 		p.mo.Pitch = 90;
         self.player = p;
+        scene = GameScene(Actor.Spawn("GameScene", (0, 0, -10)));
     }
 
     void setSpawngap()
@@ -172,6 +176,8 @@ class Handler : EventHandler
 
     override void RenderOverlay(RenderEvent e)
     {
+        if(image != "")
+            Screen.DrawTexture(Texman.CheckForTexture(image), true, 0, 0, DTA_VirtualWidth, 1920, DTA_VirtualHeight, 1080);
         switch(gamestate)
         {
             case GAMESTATE_PREGAME:
@@ -181,9 +187,60 @@ class Handler : EventHandler
         }
     }
 
+    void setImage(string img)
+    {
+        self.image = img;
+    }
+
+    void clearImage()
+    {
+        self.image = "";
+    }
+
+    /*
     void Game()
     {
         Delayer delay = Delayer(new("Delayer"));
+        console.printf("test1");
         setGameState(GAMESTATE_PREGAME);    
+        if(delay.Check())
+        console.printf("test1");
+    }*/
+}
+
+class GameScene : Actor
+{
+    DebugInfo debug;
+    Harpoon mouse;
+    Handler game;
+    Playerinfo player;
+
+    enum game_state
+    {
+        GAMESTATE_TUTORIAL,
+        GAMESTATE_PREGAME,
+        GAMESTATE_INGAME,
+        GAMESTATE_POSTGAME,
+        GAMESTATE_END
+    };
+
+    override void PostBeginPlay()
+    {
+        game = Handler(EventHandler.Find("Handler"));
+        mouse = game.mouse;
+        player = game.player;
+        debug = game.debug;
+    }
+    States
+    {
+        Spawn:
+            TNT1 A 0
+            {
+                game.setGameState(GAMESTATE_TUTORIAL);    
+                //game.setImage("graphics/TUTORIAL.png");
+            }
+            TNT1 A 30
+            {
+            }
     }
 }

@@ -48,15 +48,31 @@ class Handler : EventHandler
         debug.LogError(self.GetClassName()..".setGameState() : Unknown gamestate "..state);
     }
 
+    enum CAMERASTATE
+    {
+        CAMERA_GAME,
+        CAMERA_STAGE
+    };
+
+    void setCamera(CAMERASTATE yes)
+    {
+        switch(yes)
+        {
+            case CAMERA_GAME:
+                player.mo.SetOrigin((0, 0, 500), false);
+                player.mo.Pitch = 90;
+        }
+    }
+
     override void PlayerSpawned(PlayerEvent e)
     {
         if(Level.Mapname == "TEST")
             return;
         Playerinfo p = players[e.PlayerNumber];
-        p.mo.SetOrigin(p.mo.pos + (0, 0, 500), false);
 		p.cheats |= CF_TOTALLYFROZEN;
-		p.mo.Pitch = 90;
         self.player = p;
+
+        setCamera(CAMERA_GAME);
         scene = GameScene(Actor.Spawn("GameScene", (0, 0, -10)));
     }
 

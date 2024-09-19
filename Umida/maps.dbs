@@ -1,5 +1,5 @@
 type = "Doom Builder Map Settings Configuration";
-gameconfig = "GZDoom_DoomUDMF.cfg";
+gameconfig = "Umida.cfg";
 strictpatches = 0;
 
 maps
@@ -10,16 +10,6 @@ maps
 		
 		resources
 		{
-			
-			resource0
-			{
-				type = 1;
-				location = "C:\\Users\\user\\Documents\\Projects\\umida\\Umida";
-				option1 = 0;
-				option2 = 0;
-				notfortesting = 0;
-				requiredarchives = "";
-			}
 		}
 		defaultfloortexture = "F_SKY1";
 		defaultceiltexture = "F_SKY1";
@@ -38,9 +28,9 @@ maps
 		overrideceilheight = false;
 		overridebrightness = false;
 		uselongtexturenames = false;
-		viewpositionx = 2062f;
-		viewpositiony = 3880.268f;
-		viewscale = 0.499997f;
+		viewpositionx = 3456.538f;
+		viewpositiony = 194.0073f;
+		viewscale = 0.06129431f;
 		scriptcompiler = "zdoom_acs.cfg";
 		
 		grid

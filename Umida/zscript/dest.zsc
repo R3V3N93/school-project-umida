@@ -1,0 +1,14 @@
+class YouHaveArrivedAtYourDestination : Actor
+{
+    Default
+    {
+        +NOBLOCKMAP;
+    }
+
+    States
+    {
+        Spawn:
+            DEST A 1;
+            Loop;
+    }
+}

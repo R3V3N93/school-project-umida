@@ -7,6 +7,10 @@ class Handler : EventHandler
     Harpoon mouse;
 
     GameScene scene;
+    // different boat which is used for navigating in the stage screen
+    Actor mapBoat;
+    // destination of mapBoat
+    Actor destination;
 
     Playerinfo player;
 
@@ -61,7 +65,26 @@ class Handler : EventHandler
             case CAMERA_GAME:
                 player.mo.SetOrigin((0, 0, 500), false);
                 player.mo.Pitch = 90;
+            case CAMERA_STAGE:
+                player.mo.SetOrigin((mapBoat.pos.x, mapBoat.pos.y, 300), true);
+                player.mo.Pitch = 45;
+                player.mo.angle = mapBoat.angle;
         }
+    }
+
+    void prepareStageCutscene(Vector3 dest)
+    {
+        if(destination)
+            destination.pos = dest;
+    }
+    
+    // initial distance is given to let the function know the proper constant (g)
+    void proceedToDest(int initdist)
+    {
+        int g = initdist / 175;
+        Vector3 d = mapBoat.pos + (g*sin(mapBoat.angle), -g*cos(mapBoat.angle), 0);
+        mapBoat.SetOrigin(d, true);
+        return;
     }
 
     override void PlayerSpawned(PlayerEvent e)
@@ -74,6 +97,8 @@ class Handler : EventHandler
 
         setCamera(CAMERA_GAME);
         scene = GameScene(Actor.Spawn("GameScene", (0, 0, -10)));
+        mapBoat = Actor.Spawn("AllWeHadToDoWasToFollowTheDamnBoatCJ", (2149, 1415, 0));
+        destination = Actor.Spawn("YouHaveArrivedAtYourDestination", (2149, 1415, -10));
     }
 
     void setSpawngap()
@@ -115,7 +140,6 @@ class Handler : EventHandler
         debug = DebugInfo(Eventhandler.Find("Debuginfo"));
         setSpawngap();
         self.health = Cvar.GetCVar("sv_health_max").GetFloat();
-        
 	}
 
     override void InterfaceProcess(ConsoleEvent e)
@@ -144,7 +168,7 @@ class Handler : EventHandler
                 mouse.proj.ProjectWorldPos((trsh.pos.x, trsh.pos.y, trsh.pos.z));
                 finalLocationForGauge = mouse.proj.ProjectToScreen();
             }
-            //debug.AddMInfoItem(self.GetClassName()..".getTrashGauge().finalLocationForGauge : "..finalLocationForGauge, "handler.getTrashGauge.finalloc");
+            
             temp.x = finalLocationForGauge.x;
             temp.y = finalLocationForGauge.y;
 
@@ -212,16 +236,6 @@ class Handler : EventHandler
     {
         self.image = "";
     }
-
-    /*
-    void Game()
-    {
-        Delayer delay = Delayer(new("Delayer"));
-        console.printf("test1");
-        setGameState(GAMESTATE_PREGAME);    
-        if(delay.Check())
-        console.printf("test1");
-    }*/
 }
 
 class GameScene : Actor
@@ -230,6 +244,7 @@ class GameScene : Actor
     Harpoon mouse;
     Handler game;
     Playerinfo player;
+    int tempdist;
 
     enum game_state
     {
@@ -250,13 +265,30 @@ class GameScene : Actor
     States
     {
         Spawn:
+        Tutorial:
             TNT1 A 0
             {
                 game.setGameState(GAMESTATE_TUTORIAL);    
-                //game.setImage("graphics/TUTORIAL.png");
+                game.setImage("graphics/TUTORIAL.png");
             }
-            TNT1 A 30
+        Stage1Pre:
+            TNT1 A 0
             {
+                game.setGameState(GAMESTATE_PREGAME);
+                game.prepareStageCutscene((3399, -706, 0));
+                tempdist = game.mapBoat.Distance2D(game.destination);
+                mapboat.angle = atan2(game.destination.x - game.mapBoat.x, game.destination.y - game.mapBoat.y);
+            }
+            // 35 * 5 'A's
+            TNT1 
+            AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+            AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+            AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+            AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+            AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA 1
+            {
+                game.setCamera(CAMERA_STAGE);
+                game.proceedToDest(tempdist);
             }
     }
 }

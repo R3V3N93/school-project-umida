@@ -49,7 +49,7 @@ class Handler : EventHandler
             return;
         }
         gamestate = state;
-        debug.LogError(self.GetClassName()..".setGameState() : Unknown gamestate "..state);
+        debug.LogDebug(self.GetClassName()..".setGameState() : gamestate changed to "..gamestate);
     }
 
     enum CAMERASTATE
@@ -65,17 +65,22 @@ class Handler : EventHandler
             case CAMERA_GAME:
                 player.mo.SetOrigin((0, 0, 500), false);
                 player.mo.Pitch = 90;
+                break;
             case CAMERA_STAGE:
                 player.mo.SetOrigin((mapBoat.pos.x, mapBoat.pos.y, 300), true);
                 player.mo.Pitch = 45;
                 player.mo.angle = mapBoat.angle;
+                break;
         }
     }
 
     void prepareStageCutscene(Vector3 dest)
     {
         if(destination)
-            destination.pos = dest;
+        {
+            destination.SetOrigin(dest, false);
+            debug.LogDebug(self.GetClassName()..".prepareStageCutscene() : Changed destination : "..destination.pos);
+        }
     }
     
     // initial distance is given to let the function know the proper constant (g)
@@ -189,29 +194,32 @@ class Handler : EventHandler
         screenYUp = screenBorder[0].y;
         screenYDown = screenBorder[3].y;
 
-        debug.AddMInfoItem(self.GetClassName().." : spawngap = "..spawngap);
-        debug.AddMInfoItem(self.GetClassName()..".trashes.size() = "..trashes.size());
-        spawngap--;
-        if(spawngap <= 0)
-        {   
-            Actor r3v3n93innutshell = actor.Spawn("Trash", (screenXRight - 100.0, random(-screenYDown * 1/2, screenYDown), screenborder[3].z));
-            if(!r3v3n93innutshell)
-                debug.LogError(self.GetClassName().." : Trash not spawned!");
-            Trash(r3v3n93innutshell).accel();
-            Trash(r3v3n93innutshell).game = self;
-            trashes.push(Trash(r3v3n93innutshell));
-            setSpawngap();
-        }
-
-        if(combo > 0) 
+        if(gamestate == GAMESTATE_INGAME)
         {
-            combotimer++;
-            debug.AddMInfoItem(self.GetClassName().." : Combo Timer = "..combotimer);
-            if(combotimer >= 105)
-            {
-                stopCombo();
+            debug.AddMInfoItem(self.GetClassName().." : spawngap = "..spawngap);
+            debug.AddMInfoItem(self.GetClassName()..".trashes.size() = "..trashes.size());
+            spawngap--;
+            if(spawngap <= 0)
+            {   
+                Actor r3v3n93innutshell = actor.Spawn("Trash", (screenXRight - 100.0, random(-screenYDown * 1/2, screenYDown), screenborder[3].z));
+                if(!r3v3n93innutshell)
+                    debug.LogError(self.GetClassName().." : Trash not spawned!");
+                Trash(r3v3n93innutshell).accel();
+                Trash(r3v3n93innutshell).game = self;
+                trashes.push(Trash(r3v3n93innutshell));
+                setSpawngap();
             }
-        }
+
+            if(combo > 0) 
+            {
+                combotimer++;
+                debug.AddMInfoItem(self.GetClassName().." : Combo Timer = "..combotimer);
+                if(combotimer >= 105)
+                {
+                    stopCombo();
+                }
+            }
+        }   
     }
 
     override void RenderOverlay(RenderEvent e)
@@ -255,6 +263,12 @@ class GameScene : Actor
         GAMESTATE_END
     };
 
+    enum CAMERASTATE
+    {
+        CAMERA_GAME,
+        CAMERA_STAGE
+    };
+
     override void PostBeginPlay()
     {
         game = Handler(EventHandler.Find("Handler"));
@@ -271,21 +285,18 @@ class GameScene : Actor
                 game.setGameState(GAMESTATE_TUTORIAL);    
                 game.setImage("graphics/TUTORIAL.png");
             }
+            TNT1 A 35;
         Stage1Pre:
             TNT1 A 0
             {
+                game.clearImage();
                 game.setGameState(GAMESTATE_PREGAME);
                 game.prepareStageCutscene((3399, -706, 0));
                 tempdist = game.mapBoat.Distance2D(game.destination);
-                mapboat.angle = atan2(game.destination.x - game.mapBoat.x, game.destination.y - game.mapBoat.y);
+                game.mapboat.angle = atan2(game.destination.x - game.mapBoat.x, game.destination.y - game.mapBoat.y);
             }
             // 35 * 5 'A's
-            TNT1 
-            AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-            AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-            AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-            AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-            AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA 1
+            TNT1 AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA 1
             {
                 game.setCamera(CAMERA_STAGE);
                 game.proceedToDest(tempdist);

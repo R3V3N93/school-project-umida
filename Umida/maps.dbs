@@ -1,5 +1,5 @@
 type = "Doom Builder Map Settings Configuration";
-gameconfig = "umida.cfg";
+gameconfig = "Umida.cfg";
 strictpatches = 0;
 
 maps
@@ -28,9 +28,9 @@ maps
 		overrideceilheight = false;
 		overridebrightness = false;
 		uselongtexturenames = false;
-		viewpositionx = 2323.168f;
-		viewpositiony = 1225.635f;
-		viewscale = 0.8449926f;
+		viewpositionx = 3350.064f;
+		viewpositiony = 1188.033f;
+		viewscale = 0.06129422f;
 		scriptcompiler = "zdoom_acs.cfg";
 		
 		grid

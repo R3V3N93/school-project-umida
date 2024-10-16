@@ -38,9 +38,14 @@ Class Debuginfo : EventHandler
         p_info_tag.clear();
         m_info_tag.clear();
         Harpoon hpoon = Harpoon(EventHandler.Find("Harpoon"));
-        Handler game = Handler(EventHandler.Find("Handler"));
+        Handler hand = Handler(EventHandler.Find("Handler"));
         AddPInfoItem(String.Format("Mouse Position : %f | %f | %f", hpoon.cursor_pos_3d.x, hpoon.cursor_pos_3d.y, hpoon.cursor_pos_3d.z), "player_info_pos");  
         AddPInfoItem(String.Format("Mouse Position 2D : %f | %f", hpoon.cursor_pos.x, hpoon.cursor_pos.y), "player_info_pos_real");  
+        AddPInfoItem(String.Format("Stage : %d", hand.stage), "player_info_stage");  
+        AddPInfoItem(String.Format("State : %d", hand.gamestate), "player_info_state");  
+        AddPInfoItem(String.Format("Timer : %d", hand.timer), "player_info_timer");  
+        AddPInfoItem(String.Format("Command : %s", hand.command), "player_info_cmd");  
+        AddPInfoItem(String.Format("Command : %s", hand.playername), "player_info_name");  
         if(p)
         {
          if(p.tracer)

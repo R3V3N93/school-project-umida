@@ -2,4 +2,4 @@ user bool cl_debug_log = false;
 
 
 server noarchive float sv_health_max = 100.0;
-user string I_am_score_please_no_touch_me_else_ur_precious_points_go_bye_bye_bye_nysnc_you_watched_deadpool_its_great_movie_oops_r_rated_so_sadgeeee = "";
+user string umida_score = "";

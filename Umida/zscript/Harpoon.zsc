@@ -31,10 +31,10 @@ class HarpoonObj : Actor
     override void tick()
     {
         super.tick();
-        if(game.player.mo.tracer)
+        if(game.p.mo.tracer)
         {
             self.angle = oldangle;
-            self.SetOrigin(game.player.mo.tracer.pos, false);
+            self.SetOrigin(game.p.mo.tracer.pos, false);
         }
         else
         {

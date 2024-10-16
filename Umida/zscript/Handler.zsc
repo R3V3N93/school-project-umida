@@ -1,6 +1,14 @@
+struct StageInfo
+{
+    Vector3 cutscene_boat_location;
+    Array<string> trash_picker;
+};
+
 class Handler : EventHandler
 {
     DebugInfo debug;
+    // used to manipulate codes easily
+    string command;
     //01
     //23
     Vector3 screenBorder[4];
@@ -11,9 +19,13 @@ class Handler : EventHandler
     Actor mapBoat;
     // destination of mapBoat
     Actor destination;
+    StageInfo _stageinfo[4];
 
-    Playerinfo player;
+    string playername;
 
+    playerinfo p;
+
+    Array<string> trash_picker;
     Array<Trash> trashes;
 
     double screenXLeft;
@@ -63,14 +75,14 @@ class Handler : EventHandler
         switch(yes)
         {
             case CAMERA_GAME:
-                player.mo.SetOrigin((0, 0, 500), false);
-                player.mo.Pitch = 90;
+                p.mo.SetOrigin((0, 0, 500), false);
+                p.mo.Pitch = 90;
+                p.mo.angle = 90;
                 break;
             case CAMERA_STAGE:
-                player.mo.SetOrigin((mapBoat.pos.x, mapBoat.pos.y, 300), true);
-                player.mo.Pitch = 45;
-                player.mo.angle = mapBoat.angle;
-                break;
+                p.mo.SetOrigin((mapBoat.pos.x, mapBoat.pos.y, 300), true);
+                p.mo.Pitch = 45;
+                p.mo.angle = mapBoat.angle;
         }
     }
 
@@ -84,10 +96,10 @@ class Handler : EventHandler
     }
     
     // initial distance is given to let the function know the proper constant (g)
-    void proceedToDest(int initdist)
+    void proceedToDest(double initdist)
     {
-        int g = initdist / 175;
-        Vector3 d = mapBoat.pos + (g*sin(mapBoat.angle), -g*cos(mapBoat.angle), 0);
+        double g = initdist / 175.0;
+        Vector3 d = mapBoat.pos + (g*sin(mapBoat.angle + 90), -g*cos(mapBoat.angle + 90), 0);
         mapBoat.SetOrigin(d, true);
         return;
     }
@@ -96,14 +108,16 @@ class Handler : EventHandler
     {
         if(Level.Mapname == "TEST")
             return;
-        Playerinfo p = players[e.PlayerNumber];
-		p.cheats |= CF_TOTALLYFROZEN;
-        self.player = p;
 
-        setCamera(CAMERA_GAME);
+        playerinfo p = players[e.PlayerNumber];
+		p.cheats |= CF_TOTALLYFROZEN;
+        self.p = p;
+
         scene = GameScene(Actor.Spawn("GameScene", (0, 0, -10)));
         mapBoat = Actor.Spawn("AllWeHadToDoWasToFollowTheDamnBoatCJ", (2149, 1415, 0));
-        destination = Actor.Spawn("YouHaveArrivedAtYourDestination", (2149, 1415, -10));
+        destination = Actor.Spawn("YouHaveArrivedAtYourDestination", (2149, 1415, 0));
+
+        setCamera(CAMERA_GAME);
     }
 
     void setSpawngap()
@@ -117,7 +131,7 @@ class Handler : EventHandler
         self.health -= Cvar.GetCVar("sv_health_max").GetFloat() / 4.0;
     }
 
-    void healPlayer(double health)
+    void healplayer(double health)
     {
         self.health += health;
     }
@@ -140,21 +154,71 @@ class Handler : EventHandler
         combo = 0;
     }
 
+    void stageSetup(StageInfo &stage, vector3 cutscene_boat_location, int vinyl = 0, int bottle = 0, int chemical = 0)
+    {
+        stage.cutscene_boat_location = cutscene_boat_location;
+        for(int i = 0; i < vinyl; i++)
+            stage.trash_picker.push("vinyl");
+        for(int i = 0; i < bottle; i++)
+            stage.trash_picker.push("PlasticBottle");
+        for(int i = 0; i < chemical; i++)
+            stage.trash_picker.push("Chemical");
+    }
+
     override void OnRegister () 
 	{
         debug = DebugInfo(Eventhandler.Find("Debuginfo"));
         setSpawngap();
-        self.health = Cvar.GetCVar("sv_health_max").GetFloat();
+        self.health = Cvar.GetCVar("sv_health_max").GetFloat(); 
+
+        // Stage setups
+        stageSetup(_stageinfo[0], cutscene_boat_location: (3399, -706, 0), vinyl : 1);
+        stageSetup(_stageinfo[1], cutscene_boat_location: (5310, 1110, 0), vinyl : 3, bottle : 2);
+        stageSetup(_stageinfo[2], cutscene_boat_location: (3366, -476, 0), vinyl : 2, bottle : 3, chemical : 1);
+        stageSetup(_stageinfo[3], cutscene_boat_location: (4914, 819, 0), vinyl : 1, bottle : 3, chemical : 2);
 	}
 
-    override void InterfaceProcess(ConsoleEvent e)
+    override void NetworkProcess(ConsoleEvent e)
     {
         Array<String> args;
         e.name.split(args, "|");
         
-        if(args[0] == "Trash")
+        if(args[0] == "playername")
         {
-            
+            debug.LogDebug(self.GetClassName().." : Input character : "..args[1]);
+            if(args[1] == "backspace")
+            {
+                self.playername.DeleteLastCharacter();
+            }
+            else
+                self.playername.AppendFormat(args[1]);
+        }
+
+        if(args[0] == "command")
+        {
+            self.command = args[1];
+        }
+
+        // DEBUG CHEATS
+        // Until this dumb mf(r3v) finds out how to implement proper 'console commands'
+        // make sure to use them along with 'netevent'
+
+        if(args[0] == "umida_timer")
+        {
+            debug.LogDebug("CheatManager.umida_timer : Cheat used");
+            self.timer = e.args[0];
+        }
+
+        if(args[0] == "umida_stage")
+        {
+            debug.LogDebug("CheatManager.umida_stage : Cheat used");
+            if(e.args[0] <= 3 || e.args[0] >= 0)
+            {
+                self.stage = e.args[0];
+                self.timer = 0; // Clears the timer to ensure the player jumps into the stage
+            }
+            else
+                debug.LogWarning("CheatManager.umida_stage : Invalid stage value! Such value should be 0~4");
         }
     }
 
@@ -193,46 +257,28 @@ class Handler : EventHandler
         screenXRight = screenBorder[3].x;
         screenYUp = screenBorder[0].y;
         screenYDown = screenBorder[3].y;
+    }
 
-        if(gamestate == GAMESTATE_INGAME)
-        {
-            debug.AddMInfoItem(self.GetClassName().." : spawngap = "..spawngap);
-            debug.AddMInfoItem(self.GetClassName()..".trashes.size() = "..trashes.size());
-            spawngap--;
-            if(spawngap <= 0)
-            {   
-                Actor r3v3n93innutshell = actor.Spawn("Trash", (screenXRight - 100.0, random(-screenYDown * 1/2, screenYDown), screenborder[3].z));
-                if(!r3v3n93innutshell)
-                    debug.LogError(self.GetClassName().." : Trash not spawned!");
-                Trash(r3v3n93innutshell).accel();
-                Trash(r3v3n93innutshell).game = self;
-                trashes.push(Trash(r3v3n93innutshell));
-                setSpawngap();
-            }
-
-            if(combo > 0) 
-            {
-                combotimer++;
-                debug.AddMInfoItem(self.GetClassName().." : Combo Timer = "..combotimer);
-                if(combotimer >= 105)
-                {
-                    stopCombo();
-                }
-            }
-        }   
+    ui void UIsetCommand(string what)
+    {
+        SendNetworkEvent(String.Format("command|%s", what)); 
     }
 
     override void RenderOverlay(RenderEvent e)
     {
         if(image != "")
             Screen.DrawTexture(Texman.CheckForTexture(image), true, 0, 0, DTA_VirtualWidth, 1920, DTA_VirtualHeight, 1080);
-        switch(gamestate)
+        if(command == "carve_your_name_onto_your_grave")
         {
-            case GAMESTATE_PREGAME:
-            case GAMESTATE_INGAME:
-            case GAMESTATE_POSTGAME:
-            case GAMESTATE_END:
+            displayPlayerName();
+            UIsetCommand("");
         }
+    }
+
+    ui void displayPlayerName()
+    {
+        debug.AddMInfoItem(self.GetClassName().." : Awaiting playername input");
+        Screen.DrawText(BIGFONT, Font.CR_WHITE, 960.0, 540.0, playername, DTA_VirtualWidth, 1920, DTA_VirtualHeight, 1080);
     }
 
     void setImage(string img)
@@ -243,6 +289,41 @@ class Handler : EventHandler
     void clearImage()
     {
         self.image = "";
+    }   
+
+    override bool InputProcess (InputEvent e)
+    {
+        // Skipping pregame sequence
+        if(gamestate == GAMESTATE_PREGAME && e.Type & e.Type_KeyDown)
+        {
+            UISetCommand("skip_pregame_pls"); 
+        }
+
+        if(Level.Mapname == "TEST" && e.Type & e.Type_KeyDown)
+        {
+            //            numbers                                  big alphabets                              small alphabets
+            if((48 <= e.KeyChar && e.KeyChar <= 57) || (65 <= e.KeyChar && e.KeyChar <= 90) || (97 <= e.KeyChar && e.KeyChar <= 122))
+                debug.LogDebug(self.GetClassName().." : Key pressed : "..string.format("%c", e.KeyChar).."\nReal ASCII : "..e.KeyChar);
+        }
+
+        if(gamestate == GAMESTATE_END && e.Type & e.Type_KeyDown)
+        {
+            if(self.playername.length() < 3)
+            {   
+                //            numbers                                  big alphabets                              small alphabets
+                if((48 <= e.KeyChar && e.KeyChar <= 57) || (65 <= e.KeyChar && e.KeyChar <= 90) || (97 <= e.KeyChar && e.KeyChar <= 122))
+                    SendNetworkEvent(String.Format("playername|%s", string.format("%c", e.KeyChar)));       
+            }
+
+            if(e.Keychar == 13) {} // ENTER
+            if(e.KeyChar == 8) // BACKSPACE
+            {
+                debug.LogDebug(self.GetClassName().." : Backspace");
+                SendNetworkEvent("playername|backspace"); 
+            }
+
+        }
+        return false;
     }
 }
 
@@ -251,7 +332,7 @@ class GameScene : Actor
     DebugInfo debug;
     Harpoon mouse;
     Handler game;
-    Playerinfo player;
+    playerinfo p;
     int tempdist;
 
     enum game_state
@@ -273,9 +354,18 @@ class GameScene : Actor
     {
         game = Handler(EventHandler.Find("Handler"));
         mouse = game.mouse;
-        player = game.player;
+        p = game.p;
         debug = game.debug;
     }
+
+    string pickRandomTrashFromPicker()
+    {
+        int index = random(0, game.trash_picker.size()-1);
+        string temp = game.trash_picker[index];
+        game.trash_picker.delete(index);
+        return temp;
+    }
+
     States
     {
         Spawn:
@@ -283,15 +373,15 @@ class GameScene : Actor
             TNT1 A 0
             {
                 game.setGameState(GAMESTATE_TUTORIAL);    
-                game.setImage("graphics/TUTORIAL.png");
+                //game.setImage("graphics/TUTORIAL.png");
             }
-            TNT1 A 35;
-        Stage1Pre:
+        StagePre:
             TNT1 A 0
             {
-                game.clearImage();
+                debug.LogDebug(self.GetClassName().." : Entered state : ".."StagePre");
                 game.setGameState(GAMESTATE_PREGAME);
-                game.prepareStageCutscene((3399, -706, 0));
+                game.prepareStageCutscene(game._stageinfo[game.stage].cutscene_boat_location);
+                game.mapboat.angle = atan2(game.destination.pos.y - game.mapBoat.pos.y, game.destination.pos.x - game.mapBoat.pos.x);
                 tempdist = game.mapBoat.Distance2D(game.destination);
                 game.mapboat.angle = atan2(game.destination.x - game.mapBoat.x, game.destination.y - game.mapBoat.y);
             }
@@ -300,6 +390,97 @@ class GameScene : Actor
             {
                 game.setCamera(CAMERA_STAGE);
                 game.proceedToDest(tempdist);
+                game.timer = 35 * 60;
+                if(game.command == "skip_pregame_pls")
+                {
+                    game.command = "";
+                    game.mapboat.SetOrigin(game._stageinfo[game.stage].cutscene_boat_location, false);
+                    return ResolveState("StageLoop");
+                }
+                return state(null);
             }
+        StageLoop:
+            TNT1 A 1
+            {
+                game.setGameState(GAMESTATE_INGAME);
+                game.setCamera(CAMERA_GAME);
+                debug.AddMInfoItem(self.GetClassName().." : game.spawngap = "..game.spawngap);
+                debug.AddMInfoItem(self.GetClassName()..".game.trashes.size() = "..game.trashes.size());
+                game.spawngap--;
+                if(game.spawngap <= 0)
+                {   
+                    // resets the array
+                    if(game.trash_picker.size() == 0)
+                    {
+                        for(int i = 0; i < game._stageinfo[game.stage].trash_picker.size(); i++)
+                        {
+                            game.trash_picker.push(game._stageinfo[game.stage].trash_picker[i]);
+                        }
+                    }
+                    Actor r3v3n93innutshell = actor.Spawn(pickRandomTrashFromPicker(), (game.screenXRight - 100.0, random(-game.screenYDown * 1/2, game.screenYDown), game.screenborder[3].z));
+                    
+                    if(!r3v3n93innutshell)
+                        debug.LogError(self.GetClassName().." : Trash not spawned!");
+
+                    Trash(r3v3n93innutshell).accel();
+                    Trash(r3v3n93innutshell).game = self.game;
+                    game.trashes.push(Trash(r3v3n93innutshell));
+                    game.setSpawngap();
+                }
+
+                if(game.combo > 0) 
+                {
+                    game.combotimer++;
+                    debug.AddMInfoItem(self.GetClassName().." : Combo Timer = "..game.combotimer);
+                    if(game.combotimer >= 105)
+                    {
+                        game.stopCombo();
+                    }
+                }
+                game.timer--;
+            }
+            TNT1 A 0
+            {
+                if(game.timer > 0)
+                    return ResolveState("StageLoop");
+                return ResolveState("StagePost");
+            }
+        StagePost:
+            TNT1 A 1
+            {
+                debug.LogDebug(self.GetClassName().." : Entered state : ".."StagePost");
+                game.setGameState(GAMESTATE_POSTGAME);
+                foreach(things : game.trashes)
+                {
+                    if(things)
+                        things.destroy();
+                }
+                game.stage++;
+                if(game.stage < 4)
+                {   
+                    return ResolveState("StagePre");
+                }
+                
+                return ResolveState("Ending");
+            }
+        Ending:
+            TNT1 A 1
+            {   
+                game.setGameState(GAMESTATE_END);
+            }
+        Ending.typeurname:
+            TNT1 A 1
+            {
+                game.command = "carve_your_name_onto_your_grave";
+            }
+            TNT1 A 0
+            {
+                if(game.playername.length() < 3)
+                    return ResolveState("Ending.typeurname");
+                
+                debug.LogDebug(self.GetClassName().." : player name input complete");
+                return state(null);
+            }
+            
     }
 }

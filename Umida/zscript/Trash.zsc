@@ -49,7 +49,7 @@ class Trash : Actor
             self.destroy();
         }
 
-        if(self.vel.x == 0 && game.player.mo.tracer != self)
+        if(self.vel.x == 0 && game.p.mo.tracer != self)
         {
             /*if(mouse.cursor_actor != self)
                 self.vel.x = -10.0;*/
@@ -81,5 +81,35 @@ class Trash : Actor
                 
             }
             Loop;
+    }
+}
+
+class Vinyl : trash
+{
+    Default
+    {
+        Trash.Score 50;
+        Trash.Weight 12;
+        Trash.Speed 12;
+    }
+}
+
+class PlasticBottle : trash
+{
+    Default
+    {
+        Trash.Score 100;
+        Trash.Weight 30;
+        Trash.Speed 10;
+    }
+}
+
+class Chemical : trash
+{
+    Default
+    {
+        Trash.Score 120;
+        Trash.Weight 40;
+        Trash.Speed 8;
     }
 }

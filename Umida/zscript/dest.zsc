@@ -3,11 +3,14 @@ class YouHaveArrivedAtYourDestination : Actor
     Default
     {
         +NOBLOCKMAP;
+        Height 10;
+        Radius 100;
     }
 
     States
     {
         Spawn:
+            TNT1 A 0;
             DEST A 1;
             Loop;
     }

@@ -51,7 +51,6 @@ Class Debuginfo : EventHandler
          if(p.tracer)
              AddPInfoItem(String.Format("Tracer : %s", p.tracer.GetClassName(), "player_info_pos_real"));  
         }
-        AddPInfoItem(String.Format("gamestate : ", game.gamestate), "handler_gamestate");  
     }
 
     override void RenderOverlay (RenderEvent event) 

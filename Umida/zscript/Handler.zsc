@@ -22,6 +22,7 @@ class Handler : EventHandler
     StageInfo _stageinfo[4];
 
     string playername;
+    bool nameDone;
 
     playerinfo p;
 
@@ -190,6 +191,10 @@ class Handler : EventHandler
             {
                 self.playername.DeleteLastCharacter();
             }
+            else if(args[1] == "enter")
+            {
+                self.nameDone = true;
+            }
             else
                 self.playername.AppendFormat(args[1]);
         }
@@ -207,6 +212,19 @@ class Handler : EventHandler
         {
             debug.LogDebug("CheatManager.umida_timer : Cheat used");
             self.timer = e.args[0];
+        }
+
+        if(args[0] == "umida_resetCvar")
+        {
+            debug.LogDebug("CheatManager.umida_resetCvar : Cheat used");
+            Cvar.GetCvar("umida_score", players[0]).SetString("");
+        }
+
+
+        if(args[0] == "umida_point")
+        {
+            debug.LogDebug("CheatManager.umida_score : Cheat used");
+            self.score = e.args[0];
         }
 
         if(args[0] == "umida_stage")
@@ -315,7 +333,14 @@ class Handler : EventHandler
                     SendNetworkEvent(String.Format("playername|%s", string.format("%c", e.KeyChar)));       
             }
 
-            if(e.Keychar == 13) {} // ENTER
+            if(e.Keychar == 13) // ENTER
+            {
+                if(playername.Length() > 0)
+                {
+                    debug.LogDebug(self.GetClassName().." : Enter");
+                    SendNetworkEvent(String.Format("playername|enter"));  
+                }
+            } 
             if(e.KeyChar == 8) // BACKSPACE
             {
                 debug.LogDebug(self.GetClassName().." : Backspace");
@@ -325,6 +350,12 @@ class Handler : EventHandler
         }
         return false;
     }
+}
+
+class PlayerScore play
+{
+    string name;
+    int score;
 }
 
 class GameScene : Actor
@@ -383,7 +414,6 @@ class GameScene : Actor
                 game.prepareStageCutscene(game._stageinfo[game.stage].cutscene_boat_location);
                 game.mapboat.angle = atan2(game.destination.pos.y - game.mapBoat.pos.y, game.destination.pos.x - game.mapBoat.pos.x);
                 tempdist = game.mapBoat.Distance2D(game.destination);
-                game.mapboat.angle = atan2(game.destination.x - game.mapBoat.x, game.destination.y - game.mapBoat.y);
             }
             // 35 * 5 'A's
             TNT1 AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA 1
@@ -400,9 +430,13 @@ class GameScene : Actor
                 return state(null);
             }
         StageLoop:
-            TNT1 A 1
+            TNT1 A 0 
             {
                 game.setGameState(GAMESTATE_INGAME);
+            }
+        StageActualLoop:
+            TNT1 A 1
+            {
                 game.setCamera(CAMERA_GAME);
                 debug.AddMInfoItem(self.GetClassName().." : game.spawngap = "..game.spawngap);
                 debug.AddMInfoItem(self.GetClassName()..".game.trashes.size() = "..game.trashes.size());
@@ -442,7 +476,7 @@ class GameScene : Actor
             TNT1 A 0
             {
                 if(game.timer > 0)
-                    return ResolveState("StageLoop");
+                    return ResolveState("StageActualLoop");
                 return ResolveState("StagePost");
             }
         StagePost:
@@ -464,7 +498,7 @@ class GameScene : Actor
                 return ResolveState("Ending");
             }
         Ending:
-            TNT1 A 1
+            TNT1 A 0
             {   
                 game.setGameState(GAMESTATE_END);
             }
@@ -475,10 +509,80 @@ class GameScene : Actor
             }
             TNT1 A 0
             {
-                if(game.playername.length() < 3)
+                if(!game.nameDone)
                     return ResolveState("Ending.typeurname");
                 
                 debug.LogDebug(self.GetClassName().." : player name input complete");
+
+                PlayerScore curplayer = PlayerScore(new("PlayerScore"));
+                curplayer.name = game.playername;
+                curplayer.score = game.score;
+
+                CVar scorecvar = Cvar.FindCvar("umida_score");
+                string score = scorecvar.GetString();
+                Array<string> scoreData;
+                score.split(scoreData, "|");
+
+                Array<PlayerScore> scoreboard;
+                for(int i = 0; i < 10; i++)
+                {
+                    PlayerScore temp1 = PlayerScore(new("PlayerScore"));
+                    if(i >= scoreData.size())
+                    {
+                        temp1.score = 0;
+                        temp1.name = "";
+                    }
+                    else
+                    {
+                        Array<string> temp;
+                        scoreData[i].split(temp, "/");
+                    
+                        temp1.name = temp[0];
+                        temp1.score = temp[1].ToInt();
+                    }
+                    scoreBoard.push(temp1);
+                }
+
+                string debugscore;
+                for(int i = 0; i < 10; i++)
+                {
+                    debugscore.AppendFormat("%s/%d%s", scoreboard[i].name, scoreboard[i].score, (i != 9 ? "|" : ""));
+                }
+
+                debug.LogDebug(self.GetClassName().." : scoreBoard array : "..debugscore);
+
+                // Sort
+                if(min(scoreBoard[9].score, curplayer.score) != curplayer.score) // if current score is above the lowest score
+                {
+                    // Normally I'd have to write an algorithm to quickly sort it right,
+                    // but I'm out of time and only 10 loops shouldn't be a problem
+                    
+                    for(int i = 0; i < 10; i++)
+                    {
+                        if(max(curplayer.score, scoreboard[i].score) == curplayer.score)
+                        {
+                            debug.LogDebug(self.GetClassName().." : current player's score is at "..i.."th place");
+                            for(int j = 9; j >= i; j--) //pushing back
+                            {
+                                if(j != 9)
+                                    scoreboard[j+1] = scoreboard[j];
+                            }
+                            scoreboard[i] = curplayer;
+                            break;
+                        }
+                    }
+
+                }
+
+                string finalscore;
+
+                for(int i = 0; i < 10; i++)
+                {
+                    finalscore.AppendFormat("%s/%d%s", scoreboard[i].name, scoreboard[i].score, (i != 9 ? "|" : ""));
+                }
+                scorecvar.SetString(finalscore);
+
+                debug.LogDebug(self.GetClassName().." : final score cvar : "..finalscore);
                 return state(null);
             }
             

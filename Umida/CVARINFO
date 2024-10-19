@@ -3,3 +3,6 @@ user bool cl_debug_log = false;
 
 server noarchive float sv_health_max = 100.0;
 user string umida_score = "";
+/*
+name/score|name/score|name/score
+*/

@@ -1,1 +1,4 @@
-alias umida_timer "netevent cheat|timer"
+alias umida_timer "netevent umida_timer %1"
+alias umida_resetcvar "netevent umida_resetCvar %1"
+alias umida_point "netevent umida_point %1"
+alias umida_stage "netevent umida_stage %1"

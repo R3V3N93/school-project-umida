@@ -1,0 +1,25 @@
+Model Vinyl
+{
+    Path "Models/trash/vinyl"
+	Model 0 "w_vinyl.iqm"
+	Skin 0 "trashbag001.png"
+	scale 2.0 2.0 2.0
+	FrameIndex TRSH A 0 0
+}
+
+Model PlasticBottle
+{
+    Path "Models/trash/bottle"
+	Model 0 "w_bottle.iqm"
+	Skin 0 "water_bottle.png"
+	scale 15.0 15.0 15.0
+	offset 0 0 50
+	FrameIndex TRSH A 0 0
+}
+
+Model Chemical
+{
+    Path "Models/trash/Chemical"
+	Model 0 "w_chemical.iqm"
+	FrameIndex TRSH A 0 0
+}

@@ -1,6 +1,7 @@
 class Trash : Actor
 {
     DebugInfo debug;
+    string sound;
     int timer; // tic
     int stoptimer; //tic
     int gauge;
@@ -9,6 +10,7 @@ class Trash : Actor
     Property Weight : gauge;
     Property Score : score;
     Property Speed : velocity;
+    Property Sound : sound;
     Handler game;
     Harpoon mouse;
     Default
@@ -18,6 +20,7 @@ class Trash : Actor
         Trash.Weight 30;
         Trash.Score 100;
         Trash.Speed 10;
+        Trash.Sound "vinyl";
         +NOFRICTION;
         -SOLID;
         +SHOOTABLE;
@@ -42,44 +45,44 @@ class Trash : Actor
         debug.AddMInfoItem(self.GetClassName()..".timer = "..self.timer);
         self.timer++;
 
-        if(self.pos.x <= game.screenXLeft)
+        if(Level.mapname != "TEST")
         {
-            game.damagePlayer();
-            game.stopCombo();
-            self.destroy();
-        }
+            if(self.pos.x <= game.screenXLeft)
+            {
+                game.damagePlayer();
+                game.stopCombo();
+                self.destroy();
+            }
 
-        if(self.vel.x == 0 && game.p.mo.tracer != self)
-        {
-            /*if(mouse.cursor_actor != self)
-                self.vel.x = -10.0;*/
-            stoptimer++;
-            if(stoptimer >= 17)
-                self.accel();
-        }
-        else
-            stoptimer = 0;
-        
-        if(self.gauge <= 0)
-        {
-            game.grantScore(self.timer, self.score);
-            game.doCombo();
-            self.destroy();
-        }
-
-        if(self.gauge < self.default.gauge)
-        {   
-            self.gauge++;
+            if(self.vel.x == 0 && game.p.mo.tracer != self)
+            {
+                /*if(mouses.cursor_actor != self)
+                    self.vel.x = -10.0;*/
+                stoptimer++;
+                if(stoptimer >= 17)
+                    self.accel();
+            }
+            else
+                stoptimer = 0;
             
+            if(self.gauge <= 0)
+            {
+                game.grantScore(self.timer, self.score);
+                game.doCombo();
+                self.destroy();
+            }
+
+            if(self.gauge < self.default.gauge)
+            {   
+                self.gauge++;
+                
+            }
         }
     }
     States
     {
         Spawn:
-            TRSH A 1
-            {
-                
-            }
+            TRSH A 1;
             Loop;
     }
 }
@@ -91,6 +94,7 @@ class Vinyl : trash
         Trash.Score 50;
         Trash.Weight 12;
         Trash.Speed 12;
+        Trash.Sound "vinyl";
     }
 }
 
@@ -101,6 +105,7 @@ class PlasticBottle : trash
         Trash.Score 100;
         Trash.Weight 30;
         Trash.Speed 10;
+        Trash.Sound "plastic";
     }
 }
 
@@ -111,5 +116,6 @@ class Chemical : trash
         Trash.Score 120;
         Trash.Weight 40;
         Trash.Speed 8;
+        Trash.Sound "chemical";
     }
 }

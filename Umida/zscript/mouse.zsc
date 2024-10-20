@@ -56,7 +56,9 @@ class Harpoon : EventHandler
 	Actor pickUpTrash()
 	{
 		if(cursor_actor is 'Trash')
+		{
 			return cursor_actor;
+		}
 		
 		return null;
 	}

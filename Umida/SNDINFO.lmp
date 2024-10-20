@@ -1,0 +1,18 @@
+$random plastic {p1 p2 p3 p4}
+
+p1 "sounds/plastic_box_impact_hard1.wav"
+p2 "sounds/plastic_box_impact_hard2.wav"
+p3 "sounds/plastic_box_impact_hard3.wav"
+p4 "sounds/plastic_box_impact_hard4.wav"
+
+$random chemical {c1 c2 c3 c4 c5 c6 c7}
+
+c1 "sounds/metal_barrel_impact_hard1.wav"
+c2 "sounds/metal_barrel_impact_hard2.wav"
+c3 "sounds/metal_barrel_impact_hard3.wav"
+c4 "sounds/metal_barrel_impact_hard4.wav"
+c5 "sounds/metal_barrel_impact_hard5.wav"
+c6 "sounds/metal_barrel_impact_hard6.wav"
+c7 "sounds/metal_barrel_impact_hard7.wav"
+
+vinyl "sounds/vinyl.wav"

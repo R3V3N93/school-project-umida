@@ -44,6 +44,7 @@ class UmidaPlayer : PlayerPawn
 			{
 				debug.LogDebug(self.GetClassName().." : Picked up a trash at "..tracer.pos);
 				self.tracer.vel.x = 0;
+				S_StartSound(Trash(tracer).sound, CHAN_AUTO);
 				Trash(self.tracer).gauge -= 10;
 			}
 		}

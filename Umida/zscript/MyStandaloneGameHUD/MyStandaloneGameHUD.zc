@@ -42,6 +42,7 @@ class MyStandaloneGameHUD : BaseStatusBar
 				DrawTrashGauge();
 				DrawLeftTop();
 				DrawCombo();
+				DrawCredit();
 			}
 		}
 	}
@@ -52,19 +53,28 @@ class MyStandaloneGameHUD : BaseStatusBar
 		int yHealth = 90 * Screen.GetHeight() / 1080;
 		int sizeX, sizeY;
 		[sizeX, sizeY] = Texman.GetSize(Texman.CheckForTexture("graphics/healthbg.png"));
-		DrawBar("graphics/health.png", "graphics/healthbg.png", game.health, Cvar.GetCVar("sv_health_max").GetFloat(), (x, yHealth), 0, 0, DI_SCREEN_LEFT_TOP|DI_ITEM_CENTER, 1.0);	
+		DrawBar("graphics/health.png", "graphics/healthbg.png", game.health, Cvar.GetCVar("sv_health_max").GetFloat(), (x, yHealth), 0, 0, DI_SCREEN_LEFT_TOP|DI_ITEM_CENTER|DI_FORCESCALE, 1.0);	
 
 		string score = "000000";
-		score.Remove(6 - String.Format("%d", game.score).length() - 1, String.Format("%d", game.score).length());
+		score.Remove(6 - String.Format("%d", game.score).length(), String.Format("%d", game.score).length());
 		score.AppendFormat("%d", game.score);
-		DrawString(mBigFont, score, (x, yHealth + sizeY), DI_SCREEN_LEFT_TOP|DI_TEXT_ALIGN_CENTER, translation : Font.CR_WHITE);
-		DrawString(mHUDFont, "Health : "..int(game.health), (Screen.GetWidth() / 8, Screen.GetHeight() / 8 + mHUDFont.mfont.GetHeight()));
+
+		DrawString(mBigFont, score, (x, yHealth + sizeY), DI_SCREEN_LEFT_TOP|DI_TEXT_ALIGN_CENTER, translation : Font.CR_WHITE, scale : (5, 5));
+		//DrawString(mHUDFont, "Health : "..int(game.health), (Screen.GetWidth() / 8, Screen.GetHeight() / 8 + mHUDFont.mfont.GetHeight()));
 	}
 
 	void DrawCombo(void)
 	{
 		if(game.combo > 0)
-			DrawString(mHUDFont, String.Format("Combo\n%d", int(game.combo)), (Screen.GetWidth() / 2, Screen.GetHeight() / 8), DI_TEXT_ALIGN_CENTER);
+		{
+			DrawString(mHudFont, String.Format("Combo", int(game.combo)), (Screen.GetWidth() / 2, Screen.GetHeight() / 8), DI_TEXT_ALIGN_CENTER, scale : (3, 3), translation : Font.CR_WHITE);
+			DrawString(mHudFont, String.Format("%d", int(game.combo)), (Screen.GetWidth() / 2, Screen.GetHeight() / 8 + (mBigFont.mFont.GetHeight() * 3)), DI_TEXT_ALIGN_CENTER, scale : (3, 3), translation : Font.CR_WHITE);
+		}
+	}
+
+	void DrawCredit(void)
+	{
+		DrawString(mHudFont, String.Format("Credits %d", int(game.credit)), (Screen.GetWidth() / 2, Screen.GetHeight() * 8 / 9), DI_TEXT_ALIGN_CENTER, scale : (3, 3), translation : Font.CR_WHITE);
 	}
 
 	void DrawTrashGauge()

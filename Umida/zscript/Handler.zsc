@@ -42,6 +42,7 @@ class Handler : EventHandler
     int combo;
     int combotimer; // tic
     double health;
+    int credit;
 
     string image;
 
@@ -51,12 +52,14 @@ class Handler : EventHandler
         GAMESTATE_PREGAME,
         GAMESTATE_INGAME,
         GAMESTATE_POSTGAME,
-        GAMESTATE_END
+        GAMESTATE_END,
+        GAMESTATE_POSTEND,
+        GAMESTATE_GAMEOVER
     };
 
     void setGameState(int state)
     {
-        if(state < GAMESTATE_PREGAME || GAMESTATE_END < state)
+        if(state < GAMESTATE_TUTORIAL || GAMESTATE_GAMEOVER < state)
         {
             debug.LogError(self.GetClassName()..".setGameState() : Unknown gamestate "..state);
             return;
@@ -170,7 +173,8 @@ class Handler : EventHandler
 	{
         debug = DebugInfo(Eventhandler.Find("Debuginfo"));
         setSpawngap();
-        self.health = Cvar.GetCVar("sv_health_max").GetFloat(); 
+        self.health = Cvar.FindCVar("sv_health_max").GetFloat(); 
+        self.credit = Cvar.FindCVar("umida_credit").GetInt(); 
 
         // Stage setups
         stageSetup(_stageinfo[0], cutscene_boat_location: (3399, -706, 0), vinyl : 1);
@@ -275,6 +279,21 @@ class Handler : EventHandler
         screenXRight = screenBorder[3].x;
         screenYUp = screenBorder[0].y;
         screenYDown = screenBorder[3].y;
+
+        if(self.health <= 0)
+        {
+            if(credit <= 0 && gamestate != GAMESTATE_GAMEOVER)
+            {
+                setGameState(GAMESTATE_GAMEOVER);
+                scene.SetStateLabel("GameOver");
+            }
+            else if(gamestate != GAMESTATE_GAMEOVER)
+            {
+                debug.LogDebug(self.GetClassName().." : Player dead! using a coin");
+                self.HealPlayer(Cvar.GetCVar("sv_health_max").GetFloat());
+                credit--;
+            }
+        }
     }
 
     ui void UIsetCommand(string what)
@@ -291,12 +310,17 @@ class Handler : EventHandler
             displayPlayerName();
             UIsetCommand("");
         }
+
+        if(gamestate == GAMESTATE_GAMEOVER)
+        {
+            Screen.DrawText(BIGFONT, Font.CR_WHITE, 120.0 - BIGFONT.StringWidth("GAME OVER") / 2.0, 67.5 - BIGFONT.GetHeight() / 2, "GAME OVER", DTA_VirtualWidth, 240, DTA_VirtualHeight, 135);
+        }
     }
 
     ui void displayPlayerName()
     {
         debug.AddMInfoItem(self.GetClassName().." : Awaiting playername input");
-        Screen.DrawText(BIGFONT, Font.CR_WHITE, 960.0, 540.0, playername, DTA_VirtualWidth, 1920, DTA_VirtualHeight, 1080);
+        Screen.DrawText(BIGFONT, Font.CR_WHITE, 960.0 - BIGFONT.StringWidth(playername) / 2.0, 540.0, playername, DTA_VirtualWidth, 1920, DTA_VirtualHeight, 1080);
     }
 
     void setImage(string img)
@@ -312,19 +336,19 @@ class Handler : EventHandler
     override bool InputProcess (InputEvent e)
     {
         // Skipping pregame sequence
-        if(gamestate == GAMESTATE_PREGAME && e.Type & e.Type_KeyDown)
+        if(gamestate == GAMESTATE_PREGAME && e.Type == e.Type_KeyDown)
         {
             UISetCommand("skip_pregame_pls"); 
         }
 
-        if(Level.Mapname == "TEST" && e.Type & e.Type_KeyDown)
+        if(Level.Mapname == "TEST" && e.Type == e.Type_KeyDown)
         {
             //            numbers                                  big alphabets                              small alphabets
             if((48 <= e.KeyChar && e.KeyChar <= 57) || (65 <= e.KeyChar && e.KeyChar <= 90) || (97 <= e.KeyChar && e.KeyChar <= 122))
                 debug.LogDebug(self.GetClassName().." : Key pressed : "..string.format("%c", e.KeyChar).."\nReal ASCII : "..e.KeyChar);
         }
 
-        if(gamestate == GAMESTATE_END && e.Type & e.Type_KeyDown)
+        if(gamestate == GAMESTATE_END && e.Type == e.Type_KeyDown)
         {
             if(self.playername.length() < 3)
             {   
@@ -350,6 +374,16 @@ class Handler : EventHandler
         }
         return false;
     }
+
+    void FadeOut(int tics)
+    {
+        p.mo.A_SetBlend("00 00 00", 1.0, tics, "00 00 00", 0.0);
+    }
+
+    void FadeIn(int tics)
+    {
+        p.mo.A_SetBlend("00 00 00", 0.0, tics, "00 00 00", 1.0);
+    }
 }
 
 class PlayerScore play
@@ -372,7 +406,9 @@ class GameScene : Actor
         GAMESTATE_PREGAME,
         GAMESTATE_INGAME,
         GAMESTATE_POSTGAME,
-        GAMESTATE_END
+        GAMESTATE_END,
+        GAMESTATE_POSTEND,
+        GAMESTATE_GAMEOVER
     };
 
     enum CAMERASTATE
@@ -407,8 +443,13 @@ class GameScene : Actor
                 //game.setImage("graphics/TUTORIAL.png");
             }
         StagePre:
+            TNT1 A 35
+            {
+                game.FadeIn(36);
+            }
             TNT1 A 0
             {
+                game.FadeOut(105);
                 debug.LogDebug(self.GetClassName().." : Entered state : ".."StagePre");
                 game.setGameState(GAMESTATE_PREGAME);
                 game.prepareStageCutscene(game._stageinfo[game.stage].cutscene_boat_location);
@@ -430,14 +471,20 @@ class GameScene : Actor
                 return state(null);
             }
         StageLoop:
-            TNT1 A 0 
+            TNT1 A 35
             {
-                game.setGameState(GAMESTATE_INGAME);
+                game.FadeIn(36);
+            }
+            TNT1 A 35
+            {
+                game.setCamera(CAMERA_GAME);
+                game.FadeOut(35);
+                game.setGameState(GAMESTATE_INGAME);  
             }
         StageActualLoop:
             TNT1 A 1
             {
-                game.setCamera(CAMERA_GAME);
+                
                 debug.AddMInfoItem(self.GetClassName().." : game.spawngap = "..game.spawngap);
                 debug.AddMInfoItem(self.GetClassName()..".game.trashes.size() = "..game.trashes.size());
                 game.spawngap--;
@@ -498,8 +545,9 @@ class GameScene : Actor
                 return ResolveState("Ending");
             }
         Ending:
-            TNT1 A 0
+            TNT1 A 35
             {   
+                game.FadeIn(35);
                 game.setGameState(GAMESTATE_END);
             }
         Ending.typeurname:
@@ -585,6 +633,25 @@ class GameScene : Actor
                 debug.LogDebug(self.GetClassName().." : final score cvar : "..finalscore);
                 return state(null);
             }
-            
+        PostEnding:
+            TNT1 A 1
+            {
+                //game.SetImage()
+            }
+            Loop;
+        GameOver:
+            TNT1 A 105
+            {
+                game.FadeIn(105);
+            }
+            TNT1 A 175
+            {
+                game.FadeIn(1);
+                game.setGameState(GAMESTATE_GAMEOVER);
+            }
+            TNT1 A 1
+            {
+                Level.ChangeLevel("MAP01", 0, CHANGELEVEL_NOINTERMISSION);
+            }
     }
 }

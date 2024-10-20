@@ -6,3 +6,5 @@ user string umida_score = "";
 /*
 name/score|name/score|name/score
 */
+
+user int umida_credit = 5;

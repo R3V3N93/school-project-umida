@@ -1,0 +1,61 @@
+class PlayerScoreUI ui
+{
+    string name;
+    int score;
+}
+
+class UmidaScoreMenu : GenericMenu
+{
+    Array<PlayerScoreUI> scoreboard;
+
+    override void Init(Menu parent)
+    {
+        super.Init(parent);
+
+        string score = Cvar.FindCvar("umida_score").GetString();
+        Array<string> scoreData;
+        score.split(scoreData, "|");
+
+        for(int i = 0; i < 10; i++)
+        {
+            PlayerScoreUI temp1 = PlayerScoreUI(new("PlayerScoreUI"));
+            if(i >= scoreData.size())
+            {
+                temp1.score = 0;
+                temp1.name = "";
+            }
+            else
+            {
+                Array<string> temp;
+                scoreData[i].split(temp, "/");
+            
+                temp1.name = temp[0];
+                temp1.score = temp[1].ToInt();
+            }
+            scoreBoard.push(temp1);
+        }
+
+    }
+
+    void DrawText(font fnt, int normalcolor, double x, double y, String text)
+    {
+        Screen.DrawText(fnt, normalcolor, x - fnt.StringWidth(text) / 2.0, y, text, DTA_VirtualWidth, 480, DTA_VirtualHeight, 270);
+    }
+
+    override void Drawer()
+    {
+        Font fnt = BigFont;
+
+        DrawText(fnt, Font.CR_WHITE, 240.0, fnt.GetHeight(), "Scoreboard");
+        for(int i = 0; i < 10; i++)
+        {
+            string score = "000000";
+            score.Remove(6 - String.Format("%d", scoreboard[i].score).length(), String.Format("%d", scoreboard[i].score).length());
+            score.AppendFormat("%d", scoreboard[i].score);
+
+            string text = String.Format("%d. %s %s", i + 1/*order*/, scoreboard[i].name, score);
+
+            DrawText(fnt, Font.CR_WHITE, 240.0, 1.0 * (fnt.GetHeight() + fnt.GetHeight() * i + 54.0), text);
+        }
+    }
+}

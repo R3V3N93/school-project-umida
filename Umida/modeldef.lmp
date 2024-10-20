@@ -2,3 +2,4 @@
 #include "models/definitions/boat.mdl"
 #include "models/definitions/anchor.mdl"
 #include "models/definitions/dest.mdl"
+#include "models/definitions/trash.mdl"

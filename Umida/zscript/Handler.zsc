@@ -142,7 +142,7 @@ class Handler : EventHandler
     
     void grantScore(int selftimer, int givenscore)
     {
-        self.score += (givenscore - 23 * log10(selftimer-9)); // needs to be revised!
+        self.score += givenscore * (1 + log(combo + 1)); // multiply a coefficient if needed
         return;
     }
 
@@ -320,7 +320,8 @@ class Handler : EventHandler
     ui void displayPlayerName()
     {
         debug.AddMInfoItem(self.GetClassName().." : Awaiting playername input");
-        Screen.DrawText(BIGFONT, Font.CR_WHITE, 960.0 - BIGFONT.StringWidth(playername) / 2.0, 540.0, playername, DTA_VirtualWidth, 1920, DTA_VirtualHeight, 1080);
+        Screen.DrawText(BIGFONT, Font.CR_WHITE, 120.0 - BIGFONT.StringWidth("Type your name(3 letters)") / 2.0, 67.5 - BIGFONT.GetHeight() / 4, "Type your name(3 letters)", DTA_VirtualWidth, 240, DTA_VirtualHeight, 135);
+        Screen.DrawText(BIGFONT, Font.CR_WHITE, 120.0 - BIGFONT.StringWidth(playername) / 2.0, 67.5 - BIGFONT.GetHeight() / 2, playername, DTA_VirtualWidth, 240, DTA_VirtualHeight, 135);
     }
 
     void setImage(string img)
@@ -383,6 +384,21 @@ class Handler : EventHandler
     void FadeIn(int tics)
     {
         p.mo.A_SetBlend("00 00 00", 0.0, tics, "00 00 00", 1.0);
+    }
+
+    void Fade(int tics)
+    {
+        game.p.mo.A_SetBlend("00 00 00", 1.0, tics, "00 00 00", 1.0);
+    }
+
+    void playMus()
+    {
+        S_ChangeMusic("DEATHRUN");
+    }
+
+    void clearMus()
+    {
+        S_ChangeMusic("");
     }
 }
 
@@ -479,7 +495,8 @@ class GameScene : Actor
             {
                 game.setCamera(CAMERA_GAME);
                 game.FadeOut(35);
-                game.setGameState(GAMESTATE_INGAME);  
+                game.setGameState(GAMESTATE_INGAME);
+                game.PlayMus();  
             }
         StageActualLoop:
             TNT1 A 1
@@ -530,6 +547,7 @@ class GameScene : Actor
             TNT1 A 1
             {
                 debug.LogDebug(self.GetClassName().." : Entered state : ".."StagePost");
+                game.clearMus();
                 game.setGameState(GAMESTATE_POSTGAME);
                 foreach(things : game.trashes)
                 {
@@ -547,12 +565,13 @@ class GameScene : Actor
         Ending:
             TNT1 A 35
             {   
-                game.FadeIn(35);
+                game.FadeIn(36);
                 game.setGameState(GAMESTATE_END);
             }
         Ending.typeurname:
             TNT1 A 1
             {
+                game.Fade(2);
                 game.command = "carve_your_name_onto_your_grave";
             }
             TNT1 A 0
@@ -631,11 +650,13 @@ class GameScene : Actor
                 scorecvar.SetString(finalscore);
 
                 debug.LogDebug(self.GetClassName().." : final score cvar : "..finalscore);
+                S_ChangeMusic("THOTDCLR");
                 return state(null);
             }
         PostEnding:
             TNT1 A 1
             {
+                
                 //game.SetImage()
             }
             Loop;
@@ -646,7 +667,7 @@ class GameScene : Actor
             }
             TNT1 A 175
             {
-                game.FadeIn(1);
+                game.Fade(175);
                 game.setGameState(GAMESTATE_GAMEOVER);
             }
             TNT1 A 1

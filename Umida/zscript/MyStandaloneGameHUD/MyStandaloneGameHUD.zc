@@ -41,6 +41,7 @@ class MyStandaloneGameHUD : BaseStatusBar
 			{
 				DrawTrashGauge();
 				DrawLeftTop();
+				DrawTimer();
 				DrawCombo();
 				DrawCredit();
 			}
@@ -60,6 +61,15 @@ class MyStandaloneGameHUD : BaseStatusBar
 		score.AppendFormat("%d", game.score);
 
 		DrawString(mBigFont, score, (x, yHealth + sizeY), DI_SCREEN_LEFT_TOP|DI_TEXT_ALIGN_CENTER, translation : Font.CR_WHITE, scale : (5, 5));
+		//DrawString(mHUDFont, "Health : "..int(game.health), (Screen.GetWidth() / 8, Screen.GetHeight() / 8 + mHUDFont.mfont.GetHeight()));
+	}
+
+	void DrawTimer(int offsetx = 0, int offsety = 0)
+	{
+		int x = Screen.GetWidth() / 2;
+		int y = 45 * Screen.GetHeight() / 1080;
+
+		DrawString(mBigFont, String.Format("%d", game.timer / 35), (x, y), DI_SCREEN_LEFT_TOP|DI_TEXT_ALIGN_CENTER, translation : Font.CR_WHITE, scale : (4, 4));
 		//DrawString(mHUDFont, "Health : "..int(game.health), (Screen.GetWidth() / 8, Screen.GetHeight() / 8 + mHUDFont.mfont.GetHeight()));
 	}
 

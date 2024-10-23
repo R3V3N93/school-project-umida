@@ -1,6 +1,6 @@
 [enu default]
 
-TXT_GAME_NAME = "My Standalone Game";
+TXT_GAME_NAME = "";
 
 TXT_MAP01 = "My Test Level";
 

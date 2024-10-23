@@ -1,0 +1,1 @@
+gzdoom.exe -iwad Umida.ipk3 +logfile log.txt

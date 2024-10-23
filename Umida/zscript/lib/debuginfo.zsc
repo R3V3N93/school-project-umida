@@ -55,20 +55,23 @@ Class Debuginfo : EventHandler
 
     override void RenderOverlay (RenderEvent event) 
     {
-        DrawDebugInfoItem("\cdPlayerinfo(Playernumber = "..ConsolePlayer..")", CONST_TEXT_GAP_FROM_LOG);
-
-        for(int i = 0; i < p_info.size(); i++)
+        if(Cvar.GetCvar("cl_debug_log", players[ConsolePlayer]).GetBool() == true)
         {
-            DrawDebugInfoItem(p_info[i], (CONST_TEXT_H * 2) + i * CONST_TEXT_H + CONST_TEXT_GAP_FROM_LOG);
-        }
+            DrawDebugInfoItem("\cdPlayerinfo(Playernumber = "..ConsolePlayer..")", CONST_TEXT_GAP_FROM_LOG);
 
-        int miscgap = (p_info.size() + 3) * CONST_TEXT_H + CONST_TEXT_GAP_FROM_LOG;
+            for(int i = 0; i < p_info.size(); i++)
+            {
+                DrawDebugInfoItem(p_info[i], (CONST_TEXT_H * 2) + i * CONST_TEXT_H + CONST_TEXT_GAP_FROM_LOG);
+            }
 
-        DrawDebugInfoItem("\cvMisc debug informations", miscgap); 
+            int miscgap = (p_info.size() + 3) * CONST_TEXT_H + CONST_TEXT_GAP_FROM_LOG;
 
-        for(int i = 0; i < m_info.size(); i++)
-        {
-            DrawDebugInfoItem(m_info[i], miscgap + (CONST_TEXT_H * 2) + i * CONST_TEXT_H);
+            DrawDebugInfoItem("\cvMisc debug informations", miscgap); 
+
+            for(int i = 0; i < m_info.size(); i++)
+            {
+                DrawDebugInfoItem(m_info[i], miscgap + (CONST_TEXT_H * 2) + i * CONST_TEXT_H);
+            }
         }
     }
 
@@ -152,6 +155,8 @@ Class Debuginfo : EventHandler
     //y : y coordinate to show the message at. make sure it's between 0 ~ 1080.
     ui private bool DrawDebugInfoItem(string msg, int y)
     {
+        
+
         if(y < 0 || y > CONST_TEXT_H_DEFAULT)
         {
             LogError("DrawDebugInfoItem : input parameter y("..y..") is inbetween 0~1080.");

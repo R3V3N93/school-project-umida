@@ -21,5 +21,6 @@ Model Chemical
 {
     Path "Models/trash/Chemical"
 	Model 0 "w_chemical.iqm"
+	scale 2.0 2.0 2.0
 	FrameIndex TRSH A 0 0
 }

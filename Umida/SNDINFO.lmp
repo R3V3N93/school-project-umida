@@ -16,3 +16,7 @@ c6 "sounds/metal_barrel_impact_hard6.wav"
 c7 "sounds/metal_barrel_impact_hard7.wav"
 
 vinyl "sounds/vinyl.wav"
+
+ready ready
+go go
+timeup timeup

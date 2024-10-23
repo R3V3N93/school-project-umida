@@ -1,6 +1,7 @@
 struct StageInfo
 {
     Vector3 cutscene_boat_location;
+    string loc;
     Array<string> trash_picker;
 };
 
@@ -158,9 +159,10 @@ class Handler : EventHandler
         combo = 0;
     }
 
-    void stageSetup(StageInfo &stage, vector3 cutscene_boat_location, int vinyl = 0, int bottle = 0, int chemical = 0)
+    void stageSetup(StageInfo &stage, vector3 cutscene_boat_location, string location, int vinyl = 0, int bottle = 0, int chemical = 0)
     {
         stage.cutscene_boat_location = cutscene_boat_location;
+        stage.loc = location;
         for(int i = 0; i < vinyl; i++)
             stage.trash_picker.push("vinyl");
         for(int i = 0; i < bottle; i++)
@@ -177,10 +179,10 @@ class Handler : EventHandler
         self.credit = Cvar.FindCVar("umida_credit").GetInt(); 
 
         // Stage setups
-        stageSetup(_stageinfo[0], cutscene_boat_location: (3399, -706, 0), vinyl : 1);
-        stageSetup(_stageinfo[1], cutscene_boat_location: (5310, 1110, 0), vinyl : 3, bottle : 2);
-        stageSetup(_stageinfo[2], cutscene_boat_location: (3366, -476, 0), vinyl : 2, bottle : 3, chemical : 1);
-        stageSetup(_stageinfo[3], cutscene_boat_location: (4914, 819, 0), vinyl : 1, bottle : 3, chemical : 2);
+        stageSetup(_stageinfo[0], cutscene_boat_location: (3399, -706, 0), "SeoGuiPo", vinyl : 1);
+        stageSetup(_stageinfo[1], cutscene_boat_location: (5310, 1110, 0), "Gang Seo Gu", vinyl : 3, bottle : 2);
+        stageSetup(_stageinfo[2], cutscene_boat_location: (3366, -476, 0), "Jeju", vinyl : 2, bottle : 3, chemical : 1);
+        stageSetup(_stageinfo[3], cutscene_boat_location: (4914, 819, 0), "Tong Yeong", vinyl : 1, bottle : 3, chemical : 2);
 	}
 
     override void NetworkProcess(ConsoleEvent e)
@@ -294,6 +296,12 @@ class Handler : EventHandler
                 credit--;
             }
         }
+
+        if(command == "tutorial")
+        {
+            command = "";
+            scene.tutorial++;
+        }
     }
 
     ui void UIsetCommand(string what)
@@ -315,12 +323,18 @@ class Handler : EventHandler
         {
             Screen.DrawText(BIGFONT, Font.CR_WHITE, 120.0 - BIGFONT.StringWidth("GAME OVER") / 2.0, 67.5 - BIGFONT.GetHeight() / 2, "GAME OVER", DTA_VirtualWidth, 240, DTA_VirtualHeight, 135);
         }
+
+        if(gamestate == GAMESTATE_POSTEND)
+        {
+            string scor = String.Format("%d", score);
+            Screen.DrawText(BIGFONT, Font.CR_WHITE, 480.0 - BIGFONT.StringWidth(scor) / 2.0, 400.0, scor, DTA_VirtualWidth, 960, DTA_VirtualHeight, 540);
+        }
     }
 
     ui void displayPlayerName()
     {
         debug.AddMInfoItem(self.GetClassName().." : Awaiting playername input");
-        Screen.DrawText(BIGFONT, Font.CR_WHITE, 120.0 - BIGFONT.StringWidth("Type your name(3 letters)") / 2.0, 67.5 - BIGFONT.GetHeight() / 4, "Type your name(3 letters)", DTA_VirtualWidth, 240, DTA_VirtualHeight, 135);
+        Screen.DrawText(BIGFONT, Font.CR_WHITE, 480.0 - BIGFONT.StringWidth("Type your name(3 letters)") / 2.0, 200.0, "Type your name(3 letters)", DTA_VirtualWidth, 960, DTA_VirtualHeight, 540);
         Screen.DrawText(BIGFONT, Font.CR_WHITE, 120.0 - BIGFONT.StringWidth(playername) / 2.0, 67.5 - BIGFONT.GetHeight() / 2, playername, DTA_VirtualWidth, 240, DTA_VirtualHeight, 135);
     }
 
@@ -340,6 +354,11 @@ class Handler : EventHandler
         if(gamestate == GAMESTATE_PREGAME && e.Type == e.Type_KeyDown)
         {
             UISetCommand("skip_pregame_pls"); 
+        }
+
+        if(gamestate == GAMESTATE_TUTORIAL && e.Type == e.Type_KeyDown)
+        {
+            UISetCommand("tutorial"); 
         }
 
         if(Level.Mapname == "TEST" && e.Type == e.Type_KeyDown)
@@ -388,7 +407,7 @@ class Handler : EventHandler
 
     void Fade(int tics)
     {
-        game.p.mo.A_SetBlend("00 00 00", 1.0, tics, "00 00 00", 1.0);
+        p.mo.A_SetBlend("00 00 00", 1.0, tics, "00 00 00", 1.0);
     }
 
     void playMus()
@@ -415,6 +434,7 @@ class GameScene : Actor
     Handler game;
     playerinfo p;
     int tempdist;
+    int tutorial;
 
     enum game_state
     {
@@ -452,12 +472,21 @@ class GameScene : Actor
     States
     {
         Spawn:
-        Tutorial:
             TNT1 A 0
             {
-                game.setGameState(GAMESTATE_TUTORIAL);    
-                //game.setImage("graphics/TUTORIAL.png");
+                game.setGameState(GAMESTATE_TUTORIAL);  
             }
+        Tutorial:
+            TNT1 A 1
+            {
+                game.setImage(string.format("graphics/tuto%d.png", tutorial+1));
+                if(tutorial >= 6)
+                {
+                    return ResolveState("StagePre");
+                }
+                return state(null);
+            }
+            Loop;
         StagePre:
             TNT1 A 35
             {
@@ -495,8 +524,16 @@ class GameScene : Actor
             {
                 game.setCamera(CAMERA_GAME);
                 game.FadeOut(35);
+            }
+            TNT1 A 50
+            {
+                S_StartSound("ready", CHAN_AUTO);
+            }
+            TNT1 A 0
+            {
                 game.setGameState(GAMESTATE_INGAME);
-                game.PlayMus();  
+                game.PlayMus(); 
+                S_StartSound("go", CHAN_AUTO);
             }
         StageActualLoop:
             TNT1 A 1
@@ -544,7 +581,7 @@ class GameScene : Actor
                 return ResolveState("StagePost");
             }
         StagePost:
-            TNT1 A 1
+            TNT1 A 50
             {
                 debug.LogDebug(self.GetClassName().." : Entered state : ".."StagePost");
                 game.clearMus();
@@ -554,6 +591,11 @@ class GameScene : Actor
                     if(things)
                         things.destroy();
                 }
+                S_StartSound("timeup", CHAN_AUTO);
+                game.combo = 0;
+            }
+            TNT1 A 1
+            { 
                 game.stage++;
                 if(game.stage < 4)
                 {   
@@ -651,13 +693,13 @@ class GameScene : Actor
 
                 debug.LogDebug(self.GetClassName().." : final score cvar : "..finalscore);
                 S_ChangeMusic("THOTDCLR");
+                game.setGameState(GAMESTATE_POSTEND);
                 return state(null);
             }
         PostEnding:
             TNT1 A 1
             {
-                
-                //game.SetImage()
+                game.SetImage("end");
             }
             Loop;
         GameOver:
